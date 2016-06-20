@@ -1,0 +1,13 @@
+#/bin/sh
+JAVA_CMD=${JAVA_HOME}/bin/java
+LOG_DIR=/home/lyl/app/log/
+
+LOG_FILE=${LOG_DIR}`date "+%Y-%m-%d"`.log
+
+[ ! -a $LOGFILE ] && touch ${LOGFILE}
+
+EXE_CLASS=com.hongrui.utils.CrawlerExecutor
+
+
+
+${JAVA_CMD} -Djava.ext.dirs=`pwd`/../lib ${EXE_CLASS} | grep -v DEBUG >> ${LOG_FILE}

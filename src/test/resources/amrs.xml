@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dataset SYSTEM "dataset.dtd">
+<dataset>
+	<table name="users">
+		<column>id</column>
+		<column>username</column>
+		<column>password</column>
+		<column>email</column>
+		<column>isAdmin</column>
+		<column>isActive</column>
+		<column>isDeveloper</column>
+		<column>node_id</column>
+		<column>regist_time</column>
+		<row>
+			<value>1</value>
+			<value>admin</value>
+			<value>444087ac70dda87cccc0408adcf5f336</value>
+			<value>zl@email.com</value>
+			<value>1</value>
+			<value>1</value>
+			<value>0</value>
+			<value>1</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>dev</value>
+			<value>444087ac70dda87cccc0408adcf5f336</value>
+			<value>zl@email.com</value>
+			<value>0</value>
+			<value>1</value>
+			<value>1</value>
+			<value>1</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>user</value>
+			<value>444087ac70dda87cccc0408adcf5f336</value>
+			<value>zl@email.com</value>
+			<value>0</value>
+			<value>1</value>
+			<value>0</value>
+			<value>1</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>arthur</value>
+			<value>444087ac70dda87cccc0408adcf5f336</value>
+			<value>zl@email.com</value>
+			<value>0</value>
+			<value>0</value>
+			<value>0</value>
+			<value>0</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+	</table>
+	<table name="user_detail">
+		<column>id</column>
+		<column>user_id</column>
+		<column>real_name</column>
+		<column>number</column>
+		<column>department</column>
+		<column>tel</column>
+		<column>mobile</column>
+		<column>category</column>
+		<row>
+			<value>1</value>
+			<value>3</value>
+			<value>arthur</value>
+			<value>001</value>
+			<value>Rd</value>
+			<value>021-00000000</value>
+			<value>+86-15288888888</value>
+			<value>Category1</value>
+		</row>
+
+	</table>
+	<table name="groups">
+		<column>id</column>
+		<column>name</column>
+		<column>description</column>
+		<row>
+			<value>1</value>
+			<value>dev</value>
+			<value>developers</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>admin</value>
+			<value>administrators</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>users</value>
+			<value>General Users</value>
+		</row>
+	</table>
+	<table name="privileges">
+		<column>id</column>
+		<column>privilege</column>
+		<column>type</column>
+		<row>
+			<value>1</value>
+			<value>查看</value>
+			<value>app</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>下载</value>
+			<value>app</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>执行</value>
+			<value>app</value>
+		</row>
+		<row>
+			<value>4</value>
+			<value>查看</value>
+			<value>dir</value>
+		</row>
+		<row>
+			<value>5</value>
+			<value>上传</value>
+			<value>dir</value>
+		</row>
+		<row>
+			<value>6</value>
+			<value>下载</value>
+			<value>data</value>
+		</row>
+	</table>
+	<table name="roles">
+		<column>id</column>
+		<column>name</column>
+		<column>description</column>
+		<column>create_time</column>
+		<row>
+			<value>1</value>
+			<value>admin</value>
+			<value>管理员</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>developer</value>
+			<value>开发人员</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>guest</value>
+			<value>普通用户</value>
+			<value>2014-09-18 12:49:43</value>
+		</row>
+
+	</table>
+	<table name="category">
+		<column>id</column>
+		<column>name</column>
+		<column>path</column>
+		<column>node_id</column>
+		<column>create_time</column>
+		<column>update_time</column>
+		<column>is_deleted</column>
+		<column>platform</column>
+		<column>creator</column>
+		<row>
+			<value>1</value>
+			<value>播放器</value>
+			<value>/path/to/category1</value>
+			<value>1</value>
+			<value>2014-09-18 12:49:43</value>
+			<value>2014-09-18 13:49:43</value>
+			<value>0</value>
+			<value>1</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="application">
+		<column>id</column>
+		<column>guid</column>
+		<column>name</column>
+		<column>img</column>
+		<column>path</column>
+		<column>user_id</column>
+		<column>category_id</column>
+		<column>status</column>
+		<column>developer</column>
+		<column>approve_comment</column>
+		<column>language</column>
+		<column>keywords</column>
+		<column>description</column>
+		<column>update_time</column>
+		<column>create_time</column>
+		<column>version</column>
+		<column>platform</column>
+		<column>approver</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>Google Map</value>
+			<value>/path/to/img</value>
+			<value>/path/to/app</value>
+			<value>2</value>
+			<value>1</value>
+			<value>1</value>
+			<value>2</value>
+			<value>Good Apps</value>
+			<value>Zh-cn</value>
+			<value>Google;Map</value>
+			<value>Google Map</value>
+			<value>2014-09-18 12:49:43</value>
+			<value>2014-09-18 11:49:43</value>
+			<value>1.1</value>
+			<value>1</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="data">
+		<column>id</column>
+		<column>app_uid</column>
+		<column>name</column>
+		<column>description</column>
+		<column>application_id</column>
+		<column>user_id</column>
+		<column>category_id</column>
+		<column>path</column>
+		<column>node_id</column>
+		<column>approver</column>
+		<column>platform</column>
+		<column>version</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>地图数据</value>
+			<value>google地图数据</value>
+			<value>1</value>
+			<value>2</value>
+			<value>1</value>
+			<value>/path/to/data</value>
+			<value>1</value>
+			<value>1</value>
+			<value>1</value>
+			<value>1.1</value>
+		</row>
+	</table>
+	<table name="role_has_application_privilege">
+		<column>role_id</column>
+		<column>privilege_id</column>
+		<column>application_id</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>1</value>
+			<value>2</value>
+			<value>1</value>
+		</row>
+		<!-- <row> -->
+		<!-- <value>1</value> -->
+		<!-- <value>3</value> -->
+		<!-- <value>1</value> -->
+		<!-- </row> -->
+	</table>
+	<table name="role_has_category_privilege">
+		<column>role_id</column>
+		<column>category_id</column>
+		<column>privilege_id</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>4</value>
+		</row>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>5</value>
+		</row>
+	</table>
+	<table name="role_has_data_privilege">
+		<column>role_id</column>
+		<column>data_id</column>
+		<column>privilege_id</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+			<value>6</value>
+		</row>
+	</table>
+	<table name="user_has_application_privilege">
+		<column>user_id</column>
+		<column>privilege_id</column>
+		<column>application_id</column>
+		<row>
+			<value>3</value>
+			<value>1</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>2</value>
+			<value>1</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>3</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="user_has_category_privilege">
+		<column>user_id</column>
+		<column>category_id</column>
+		<column>privilege_id</column>
+		<row>
+			<value>3</value>
+			<value>1</value>
+			<value>4</value>
+		</row>
+		<row>
+			<value>3</value>
+			<value>1</value>
+			<value>5</value>
+		</row>
+	</table>
+
+	<table name="user_has_data_privilege">
+		<column>user_id</column>
+		<column>data_id</column>
+		<column>privilege_id</column>
+		<row>
+			<value>3</value>
+			<value>1</value>
+			<value>6</value>
+		</row>
+	</table>
+	<table name="user_has_role">
+		<column>user_id</column>
+		<column>role_id</column>
+		<row>
+			<value>3</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="usergroup">
+		<column>user_id</column>
+		<column>group_id</column>
+		<row>
+			<value>1</value>
+			<value>1</value>
+		</row>
+	</table>
+	<table name="platform">
+		<column>id</column>
+		<column>name</column>
+		<column>description</column>
+		<row>
+			<value>1</value>
+			<value>Android</value>
+		</row>
+		<row>
+			<value>2</value>
+			<value>WinCE</value>
+		</row>
+
+		<row>
+			<value>3</value>
+			<value>瑞华</value>
+		</row>
+
+	</table>
+</dataset>
