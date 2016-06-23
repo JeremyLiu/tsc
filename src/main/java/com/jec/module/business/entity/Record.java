@@ -3,6 +3,7 @@ package com.jec.module.business.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jec.utils.Constants;
 import com.jec.utils.DateTimeUtils;
+import com.jec.utils.XmlUtils;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -39,16 +40,8 @@ public class Record implements Serializable{
     @Column(name="file")
     private String filePath;
 
+    @Transient
     private List<RecordSegment> segments = new ArrayList<>();
-
-    public Record(){
-
-    }
-
-    public Record(int id){
-        this.id = id;
-        setFilePath(id);
-    }
 
     public int getId() {
         return id;
@@ -97,7 +90,7 @@ public class Record implements Serializable{
 
     @JsonIgnore
     public String getPcmFile(){
-        return filePath + File.separator + "raw.pcm";
+        return filePath + File.separator + "data";
     }
 
     @JsonIgnore
@@ -109,7 +102,7 @@ public class Record implements Serializable{
         this.filePath = filePath;
     }
 
-    private void setFilePath(int id){
+    public void setFilePath(int id){
         String date = DateTimeUtils.Date2String(new Date());
         filePath = Constants.recordPath + File.separator + date + File.separator + id;
         File file = new File(filePath);
@@ -117,20 +110,29 @@ public class Record implements Serializable{
             file.mkdirs();
     }
 
-    public RecordSegment newSegment(long end){
-        int lastIndex = segments.size();
-        long lastByte = 0L;
-        if(lastIndex > 0)
-            lastByte = segments.get(lastIndex-1).getEndByte()+1;
-        if(end < lastByte)
-            return null;
-        RecordSegment recordSegment = new RecordSegment(this,lastIndex);
-        recordSegment.setStartByte(lastByte);
-        recordSegment.setEndByte(end);
-        return recordSegment;
+//    public RecordSegment newSegment(long end){
+//        int lastIndex = segments.size();
+//        long lastByte = 0L;
+//        if(lastIndex > 0)
+//            lastByte = segments.get(lastIndex-1).getEndByte()+1;
+//        if(end < lastByte)
+//            return null;
+//        RecordSegment recordSegment = new RecordSegment(this,lastIndex);
+//        recordSegment.setStartByte(lastByte);
+//        recordSegment.setEndByte(end);
+//        return recordSegment;
+//    }
+
+    @JsonIgnore
+    public List<RecordSegment> getSegments() {
+        return segments;
     }
 
-    public void addSegment(RecordSegment segment){
-        segments.add(segment);
+    public void setSegments(List<RecordSegment> segments) {
+        this.segments = segments;
+    }
+
+    public void readConfig(){
+        segments = XmlUtils.readXml(getXmlFile(),RecordSegment.class);
     }
 }

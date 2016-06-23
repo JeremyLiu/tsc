@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tongling extends NetState implements Serializable{
-	
-	private int netunit;
 
 	private BCD number;
 	
@@ -24,14 +22,6 @@ public class Tongling extends NetState implements Serializable{
 	private List<Member> commanders = new ArrayList<>();
 	
 	private List<Member> members = new ArrayList<Member>();
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
 
 	public String getNumber() {
 		return number.toString();

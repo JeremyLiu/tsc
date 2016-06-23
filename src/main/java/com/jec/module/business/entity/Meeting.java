@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Meeting extends NetState implements Serializable{
-	
-	private int netunit;
 
 	private BCD number;
 	
@@ -18,14 +16,6 @@ public class Meeting extends NetState implements Serializable{
 	private BCD caller;
 	
 	private List<Member> members = new ArrayList<Member>();
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
 
 	public String getName() {
 		return name;

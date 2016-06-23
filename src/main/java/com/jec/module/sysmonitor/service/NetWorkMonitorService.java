@@ -43,6 +43,7 @@ public class NetWorkMonitorService {
     @Resource
     private NetConnectDao netConnectDao;
 
+
     @Transactional
     public int addNetUnit(String name, String ip, int port, int slotCount){
         try {
@@ -136,7 +137,6 @@ public class NetWorkMonitorService {
             cardDao.save(cards);
             netUnit.setCardCount(slotCount);
         }
-
         return newId;
     }
 

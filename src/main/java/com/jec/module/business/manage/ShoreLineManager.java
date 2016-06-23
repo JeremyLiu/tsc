@@ -46,7 +46,7 @@ public class ShoreLineManager extends BusinessManager<ShoreLine>{
         target.setShoreNumber(pdu.getBCD(offset, PduConstants.LENGTH_OF_BCD));
         offset += PduConstants.LENGTH_OF_BCD;
 
-        target.shoreState = pdu.getInt8(offset);
+        target.setShoreState(pdu.getInt8(offset));
         offset++;
 
         target.setNumber(pdu.getBCD(offset, PduConstants.LENGTH_OF_BCD));

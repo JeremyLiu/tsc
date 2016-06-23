@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -82,6 +83,14 @@ public class BaseDao<T, ID extends Serializable> extends GenericDAOImpl<T, ID> {
 		}
 
 		return result;
+	}
+
+	public void openSession(){
+		SessionFactory sessionFactory = getSessionFactory();
+		if(sessionFactory != null) {
+			Session session = sessionFactory.openSession();
+			session.beginTransaction();
+		}
 	}
 }
 

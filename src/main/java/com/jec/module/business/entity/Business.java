@@ -12,9 +12,9 @@ public class Business implements Serializable {
 
     private String img;
 
-    private Date startTime;
-
     private int type;
+
+    private int count;
 
     public Business(){
 
@@ -50,12 +50,12 @@ public class Business implements Serializable {
         this.name = name;
     }
 
-    public Date getStartTime() {
-        return startTime;
+
+    public int getCount() {
+        return count;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+    public void setCount(int count) {
+        this.count = count;
     }
-
 }

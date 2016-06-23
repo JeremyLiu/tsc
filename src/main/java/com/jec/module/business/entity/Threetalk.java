@@ -7,23 +7,13 @@ import com.jec.protocol.unit.BCD;
 import java.io.Serializable;
 
 public class Threetalk extends NetState implements Serializable{
-	
-	private int netunit;
+
 
 	private BCD caller = new BCD();
 	
 	private Member second = new Member();
 	
 	private Member third = new Member();
-
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
 
 	public String getCaller() {
 		return caller.toString();

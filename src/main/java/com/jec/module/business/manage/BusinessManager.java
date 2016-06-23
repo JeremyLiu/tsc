@@ -3,10 +3,11 @@ package com.jec.module.business.manage;
 import com.jec.base.entity.MonitorConstant;
 import com.jec.base.entity.NetState;
 import com.jec.module.business.entity.Business;
-import com.jec.module.business.entity.Meeting;
+import com.jec.module.business.entity.Tongling;
 import com.jec.protocol.pdu.PDU;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -15,11 +16,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 abstract public class BusinessManager<T extends NetState> {
 
-    protected List<T> entries = new CopyOnWriteArrayList<T>();
+    protected List<T> entries = new ArrayList<>();
 
     protected Business business;
 
-    public  void setEntry(T entry){
+    public  synchronized void setEntry(T entry){
         if(entry == null) {
             return;
         }
@@ -33,8 +34,6 @@ abstract public class BusinessManager<T extends NetState> {
                 if(entry.getState() == MonitorConstant.BUSINESS_STATE_IDLE) {
 
                     // if new state is idle
-
-//						e.st entry.state;
 
                     entries.remove(e);
 
@@ -62,11 +61,11 @@ abstract public class BusinessManager<T extends NetState> {
 
     }
 
-    public List<T> getEntries() {
+    public synchronized List<T> getEntries() {
         return entries;
     }
 
-    public void clear(int netunit){
+    public synchronized void clear(int netunit){
         for(int i= 0; i< entries.size(); i++){
             if(netunit == entries.get(i).getNetunit()) {
                 entries.remove(i);

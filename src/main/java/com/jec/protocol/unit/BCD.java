@@ -1,8 +1,12 @@
 package com.jec.protocol.unit;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class BCD {
+@JsonSerialize(using = BCDSerializer.class)
+public class BCD implements Serializable{
 	
 	
     final static char[] digitMap = {

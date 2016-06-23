@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Broadcast extends NetState implements Serializable{
-	
-	private int netunit;
-	
+
 	private BCD number;
 	
 	private BCD device;
@@ -18,14 +16,6 @@ public class Broadcast extends NetState implements Serializable{
 	private String name;
 	
 	public List<Member> members = new ArrayList<>();
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
 
 	public String getNumber() {
 		return number.toString();

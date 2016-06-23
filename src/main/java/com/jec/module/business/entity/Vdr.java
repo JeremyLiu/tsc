@@ -2,26 +2,16 @@ package com.jec.module.business.entity;
 
 
 import com.jec.base.entity.NetState;
-import com.jec.module.sysmonitor.vo.State;
 import com.jec.protocol.unit.BCD;
 
 import java.io.Serializable;
 
 public class Vdr extends NetState implements Serializable{
-	
-	private int netunit;
+
 
 	private BCD vdr;
 	
 	private Member user = new Member();
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
 
 	public String getVdr() {
 		return vdr.toString();

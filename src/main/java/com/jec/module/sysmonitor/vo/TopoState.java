@@ -3,7 +3,7 @@ package com.jec.module.sysmonitor.vo;
 /**
  * Created by jeremyliu on 5/18/16.
  */
-public class State{
+public class TopoState {
 
     private int id;
     private int slot;
@@ -16,20 +16,20 @@ public class State{
     public final static int PORT = 2;
     private final static String pathDelem = ",";
 
-    public State(int id,int state){
+    public TopoState(int id, int state){
         this.id = id;
         this.type = NETUNIT;
         this.state = state;
     }
 
-    public State(int id, int slot, int state){
+    public TopoState(int id, int slot, int state){
         this.id = id;
         this.slot = slot;
         this.type = CARD;
         this.state = state;
     }
 
-    public State(int id, int slot, int port,int state){
+    public TopoState(int id, int slot, int port, int state){
         this.id = id;
         this.slot = slot;
         this.port = port;

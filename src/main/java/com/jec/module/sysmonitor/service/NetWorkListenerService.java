@@ -103,7 +103,7 @@ public class NetWorkListenerService{
 
     @PostConstruct
     public void startListen() {
-        exit = false;
+        exit = true;
         ListenerThread worker = new ListenerThread();
         worker.start();
     }
@@ -160,7 +160,7 @@ public class NetWorkListenerService{
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-            BufferedPdu pdu = new BufferedPdu();
+//            BufferedPdu pdu = new BufferedPdu();
 
             while (!exit) {
 
@@ -168,29 +168,9 @@ public class NetWorkListenerService{
 
                     socket.receive(packet);
                     executor.submit(new Worker(packet));
-//                    boolean done = false;
-//                    for(RawProcessor listener: listeners){
-//                        if(listener.process(packet)){
-//                            done = true;
-//                            break;
-//                        }
-//                    }
-//                    if(done)
-//                        continue;
-//
-//                    byte[] data = packet.getData();
-//                    int offset = packet.getOffset();
-//                    int length = packet.getLength();
-//                    pdu.setData(data, offset, length);
-//
-//                    // 解析
-//                    parsePdu(pdu);
-
-                    //processor.addPdu(packetToPdu(packet));
-
                 } catch (SocketTimeoutException e) {
 
-//                    e.printStackTrace();
+                    e.printStackTrace();
 
                 } catch (IOException e) {
                     e.printStackTrace();

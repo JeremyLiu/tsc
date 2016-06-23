@@ -50,7 +50,7 @@ public class NetState implements Serializable{
     public void setState(int state) {
         this.state = state;
     }
-    @JsonIgnore
+
     public int getNetunit() {
         return netunit;
     }

@@ -69,9 +69,12 @@ public class BusynessService implements Processor{
     public List<Business> getBrief(){
         List<Business> businesses = new ArrayList<>();
         for(BusinessManager businessManager: businessManagers.values()){
-            if(businessManager.getEntries().size()>0)
-                businesses.add(businessManager.getBrief());
-
+            int count = businessManager.getEntries().size();
+            if(count>0) {
+                Business business = businessManager.getBrief();
+                business.setCount(count);
+                businesses.add(business);
+            }
         }
         return businesses;
     }

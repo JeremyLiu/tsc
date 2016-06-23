@@ -14,9 +14,7 @@ import org.dom4j.io.SAXReader;
 import org.springframework.core.serializer.Serializer;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.InputStream;
-import java.io.Writer;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -79,8 +77,13 @@ public class XmlUtils {
         }
     });
 
-    public static String objToXml(Object obj, Class clazz){
-        xstream.alias("xml",clazz);
+//    public static String objToXml(Object obj, Class clazz){
+//        xstream.alias("xml",clazz);
+//        return xstream.toXML(obj);
+//    }
+
+    public static String objToXml(Object obj, Class<?>... classes){
+        xstream.processAnnotations(classes);
         return xstream.toXML(obj);
     }
 
@@ -109,10 +112,41 @@ public class XmlUtils {
         return xstream.toXML(xmlMessage);
     }
 
-    public static Object toEntity(String xml, Class<?>[] clazz){
+    public static Object toEntity(String xml, Class<?>... clazz){
         xstream.setMode(XStream.NO_REFERENCES);
         xstream.processAnnotations(clazz);
         return xstream.fromXML(xml);
     }
 
+    public static boolean writeXml(String filepath,Object obj, Class<?>... classes){
+        Writer out;
+        try {
+            out = new FileWriter(new File(filepath));
+            out.write(objToXml(obj,classes));
+            out.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static<T> T readXml(String filepath, Class<?>... classes){
+        Reader in;
+        try {
+            in = new FileReader(new File(filepath));
+            BufferedReader reader = new BufferedReader(in);
+            String line = reader.readLine();
+            String xml = "";
+            while(line != null){
+                xml += line;
+                line = reader.readLine();
+            }
+            in.close();
+            return (T)toEntity(xml,classes);
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -29,7 +29,10 @@ public class BytesWrap {
 		this.len = len;
 	}
 	
-	
+	public void setOff(int off,int len){
+		this.off = off;
+		this.len = len;
+	}
 	
 	public byte[] buffer() {
 		return buffer;
@@ -105,10 +108,6 @@ public class BytesWrap {
 		}
 		
 		BCD v = BCD.fromBytes(buffer, offset + off, length);
-		if(v == null) {
-			throw new RuntimeException("���ݸ�ʽ�����޷���BCD�����");
-		}
-
 		return v;	
 	}
 	

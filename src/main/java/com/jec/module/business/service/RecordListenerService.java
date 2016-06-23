@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.net.*;
 
@@ -16,15 +17,20 @@ import java.net.*;
 @Scope
 public class RecordListenerService {
 
+    @Resource
+    private RecordService recordService;
+
     private boolean exit = true;
 
     public synchronized void stopListen() {
         exit = true;
     }
 
+
     @PostConstruct
     public void startListener(){
-
+        exit =false;
+        new ListenerThread().start();
     }
 
     private class ListenerThread extends Thread {
@@ -39,7 +45,7 @@ public class RecordListenerService {
                 try {
 
                     socket = new DatagramSocket(
-                            NetWorkUtil.listenPort,
+                            NetWorkUtil.recordListenPort,
                             InetAddress.getByName(NetWorkUtil.getLocalHost()));
 
                     socket.setSoTimeout(2000);
@@ -86,8 +92,7 @@ public class RecordListenerService {
                 try {
 
                     socket.receive(packet);
-
-
+                    recordService.process(packet);
 
                 } catch (SocketTimeoutException e) {
 

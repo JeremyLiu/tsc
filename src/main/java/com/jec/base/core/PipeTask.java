@@ -5,5 +5,9 @@ package com.jec.base.core;
  */
 abstract public class PipeTask<T> {
 
-    abstract public void work(T t);
+    abstract public boolean prepare();
+
+    abstract public boolean work(T t);
+
+    abstract public boolean done();
 }

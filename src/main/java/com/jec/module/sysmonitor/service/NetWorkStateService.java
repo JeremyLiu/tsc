@@ -3,7 +3,7 @@ package com.jec.module.sysmonitor.service;
 import com.googlecode.genericdao.search.Search;
 import com.jec.base.entity.NetState;
 import com.jec.module.sysmonitor.dao.NetConnectDao;
-import com.jec.module.sysmonitor.vo.State;
+import com.jec.module.sysmonitor.vo.TopoState;
 import com.jec.protocol.command.CommandExecutor;
 import com.jec.protocol.command.PduCommand;
 import com.jec.protocol.command.Result;
@@ -17,12 +17,12 @@ import com.jec.protocol.pdu.PduConstants;
 import com.jec.protocol.pdu.ProtocolUtils;
 import com.jec.protocol.processor.Processor;
 import com.jec.protocol.unit.BCD;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @Service
 @Scope
-public class NetWorkStateService implements Processor, ApplicationContextAware{
+public class NetWorkStateService extends Thread implements Processor{
 
     @Resource
     private NetUnitDao netUnitDao;
@@ -59,13 +59,30 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
 
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private Map<String, State> states = new HashMap<String, State>();
+    private Map<String, TopoState> states = new HashMap<>();
+
+    private Map<Integer,Integer> netUnitStates = new HashMap<>();
+
+    private boolean exit = false;
+
+    private List<NetUnit> netUnits = new ArrayList<>();
 
     @PostConstruct
     public void init(){
         netWorkListenerService.addProcessor(PduConstants.CMD_TYPE_SBJS,this);
+        this.start();
     }
 
+//    @Transactional(readOnly = true)
+//    public void syncNetUnit(){
+//        netUnits = netUnitDao.findAll();
+//    }
+
+
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    private void getNetUnitState(){
+
+    }
     @Transactional(readOnly = true)
     public NetUnitState getInitState(int netUnitId){
         NetUnit netUnit =netUnitDao.find(netUnitId);
@@ -80,7 +97,9 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
 
         int netUnitId = netUnit.getId();
         NetUnitState state = new NetUnitState();
-        state.setState(getNetUnitState(netUnit));
+        Integer netUnitState = netUnitStates.get(netUnitId);
+        if(netUnitState != null)
+            state.setState(netUnitState);
 
         Search search = new Search();
         search.addFilterEqual("netUnitId",netUnitId);
@@ -94,7 +113,7 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
 
         lock.readLock().lock();
         for(int i=0; i<cardNumber; i++){
-            path = State.buildPath(netUnitId,i+1);
+            path = TopoState.buildPath(netUnitId,i+1);
             CardView card = cards.get(i);
             cardStates[i] = new CardState();
 
@@ -113,7 +132,7 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
                 for(int j=0; j< portNumber; j++){
                     portStates[j] = new NetState();
                     portStates[j].setId(j);
-                    path = State.buildPath(netUnitId,i,j);
+                    path = TopoState.buildPath(netUnitId,i,j);
                     if(states.containsKey(path)) {
                         int portState = states.get(path).getState();
                         portStates[j].setState(portState);
@@ -169,18 +188,16 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
 
     @Transactional(readOnly = true)
     public Map<String, Object> readNetUnitState(){
-        List<NetUnit> netUnits = netUnitDao.findAll();
-        Map<Integer,Integer> stateMap = new HashMap<>(netUnits.size());
+//        Map<Integer,Integer> stateMap = new HashMap<>(netUnits.size());
         List<NetState> state = new ArrayList<>(netUnits.size());
 
         //获取网元及设备的状态
         for(NetUnit netUnit : netUnits) {
-            int netUnitState = getNetUnitState(netUnit);
             NetState netState = new NetState();
             netState.setId(netUnit.getId());
-            netState.setState(netUnitState);
+            if(netUnitStates.containsKey(netUnit.getId()))
+                netState.setState(netUnitStates.get(netState.getId()));
             state.add(netState);
-            stateMap.put(netUnit.getId(), netUnitState);
         }
 
         //获取连接状态
@@ -199,10 +216,13 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
 
             int srcId = topo.getSrcId();
             ConnectState connectState = ConnectState.from(topo);
-            if(stateMap.get(srcId) != NetState.US_NORMAL)
-                connectState.setState(stateMap.get(srcId));
+            Integer netState = netUnitStates.get(srcId);
+            if(netState == null)
+                netState = NetState.UNKNOWN;
+            if(netState != NetState.US_NORMAL)
+                connectState.setState(netState);
             else {
-                String path = State.buildPath(srcId, topo.getSlot(), topo.getPort());
+                String path = TopoState.buildPath(srcId, topo.getSlot(), topo.getPort());
                 lock.readLock().lock();
                 if(states.containsKey(path))
                     connectState.setState(states.get(path).getState());
@@ -237,38 +257,39 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
         search.addSort("slot",false);
     }
 
+
 //    private void setNetUnitState(int netUnit, int state){
-//        String path = State.buildPath(netUnit);
+//        String path = TopoState.buildPath(netUnit);
 //        lock.writeLock().lock();
 //        if(states.containsKey(path)){
-//            State s = states.get(path);
+//            TopoState s = states.get(path);
 //            s.setState(state);
 //        }else
-//            states.put(path,new State(netUnit, state));
+//            states.put(path,new TopoState(netUnit, state));
 //        lock.writeLock().unlock();
 //    }
 
     private  void setCardState(int netUnit, int slot, int state){
         state = NetState.cardStateMap(state);
-        String path = State.buildPath(netUnit,slot);
+        String path = TopoState.buildPath(netUnit,slot);
         lock.writeLock().lock();
         if(states.containsKey(path)){
-            State s = states.get(path);
+            TopoState s = states.get(path);
             s.setState(state);
         }else
-            states.put(path,new State(netUnit, slot,state));
+            states.put(path,new TopoState(netUnit, slot,state));
         lock.writeLock().unlock();
     }
 
     private void setPortState(int netUnit, int slot, int port, int state){
         state = NetState.deviceStateMap(state);
-        String path = State.buildPath(netUnit,slot, port);
+        String path = TopoState.buildPath(netUnit,slot, port);
         lock.writeLock().lock();
         if(states.containsKey(path)){
-            State s = states.get(path);
+            TopoState s = states.get(path);
             s.setState(state);
         }else
-            states.put(path,new State(netUnit, slot, port, state));
+            states.put(path,new TopoState(netUnit, slot, port, state));
         lock.writeLock().unlock();
     }
 
@@ -310,7 +331,21 @@ public class NetWorkStateService implements Processor, ApplicationContextAware{
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        applicationContext.getBeanDefinitionNames();
+    public void run(){
+        TransactionSynchronizationManager.initSynchronization();
+        while(!exit) {
+            try {
+                Thread.sleep(5000);
+                List<NetUnit> netUnits = netUnitDao.findAll();
+
+                //获取网元及设备的状态
+                for(NetUnit netUnit : netUnits) {
+                    int netUnitState = getNetUnitState(netUnit);
+                    netUnitStates.put(netUnit.getId(), netUnitState);
+                }
+            }catch (Exception ie){
+                ie.printStackTrace();
+            }
+        }
     }
 }

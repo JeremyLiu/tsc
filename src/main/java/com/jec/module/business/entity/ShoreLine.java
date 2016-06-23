@@ -19,8 +19,6 @@ public class ShoreLine extends NetState implements Serializable{
 		default: return "未知类型(" + type + ")";
 		}
 	}
-
-	private int netunit;
 	
 	private int type;
 	
@@ -32,15 +30,7 @@ public class ShoreLine extends NetState implements Serializable{
 	
 	private BCD shoreNumber;
 	
-	public int shoreState;
-
-	public int getNetunit() {
-		return netunit;
-	}
-
-	public void setNetunit(int netunit) {
-		this.netunit = netunit;
-	}
+	private int shoreState;
 
 	public int getType() {
 		return type;
