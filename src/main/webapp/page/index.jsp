@@ -10,7 +10,9 @@
     <link rel="stylesheet" type="text/css" href="static/css/vendor/bootstrap-treeview.min.css">
     <link rel="stylesheet" type="text/css" href="static/css/vendor/jquery-ui-1.10.4.custom.min.css">
     <link rel="stylesheet" type="text/css" href="static/css/vendor/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="static/js/datetimepicker/css/bootstrap-datepicker.css">
+    <link rel="stylesheet" type="text/css" href="static/css/vendor/jplayer.blue.monday.css" />
     <link rel="stylesheet" type="text/css" href="static/css/index.css" />
     <script src="static/js/jquery-2.2.3.min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
@@ -18,12 +20,13 @@
     <script src="static/js/vendors.js"></script>
     <script src="static/js/datetimepicker/js/bootstrap-datepicker.min.js"></script>
     <script src="static/js/datetimepicker/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+    <script src="static/js/jquery.jplayer.min.js"></script>
 </head>
 <body>
+<script>
+    window.role = "${role}".split(',');
+</script>
     <div id="container"></div>
-    <script type="text/javascript">
-        window.role = [];
-    </script>
 <script src="static/js/app.js"></script>
 </body>
 </html>

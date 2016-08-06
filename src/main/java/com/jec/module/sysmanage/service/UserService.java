@@ -1,10 +1,13 @@
 package com.jec.module.sysmanage.service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 import javax.jws.soap.SOAPBinding;
 
+import com.jec.module.sysmanage.dao.PrivilegeDao;
 import com.jec.module.sysmanage.dao.RoleDao;
 import com.jec.module.sysmanage.entity.Privilege;
 import com.jec.module.sysmanage.entity.Role;
@@ -27,6 +30,12 @@ public class UserService {
 
 	@Resource
 	private RoleDao roleDao;
+
+	@Resource
+	private PrivilegeDao privilegeDao;
+
+	@Resource
+	private SysLogService sysLogService;
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	public List<User> getAll()
@@ -77,6 +86,8 @@ public class UserService {
 		user.setPassword(password);
 		user.setRoleId(role);
 		userDao.save(user);
+
+		sysLogService.addLog("4-0","创建新用户" + username);
 		return user;
 	}
 
@@ -91,8 +102,13 @@ public class UserService {
 	}
 
 	@Transactional
-	public boolean modifyUser(int userId, String name, Integer role){
-		return userDao.updateUser(userId, name, role) > 0;
+	public boolean modifyUser(int userId, String name, Integer role, String password){
+		if(userDao.updateUser(userId, name, role, password) > 0) {
+			sysLogService.addLog("4-0","修改用户 "+ name +" 的信息");
+			return true;
+		}
+		else
+			return false;
 	}
 
 	@Transactional
@@ -107,7 +123,9 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public List<Role> getAllRoles(){
-		return roleDao.findAll();
+		Search search = new Search(Role.class);
+		search.addFilterGreaterThan("id", 0);
+		return roleDao.search(search);
 	}
 
 	@Transactional
@@ -123,5 +141,70 @@ public class UserService {
 	public Role getUserRole(int userId){
 		User user = userDao.find(userId);
 		return roleDao.find(user.getRoleId());
+	}
+
+	@Transactional
+	public Role addUserRole(String name, String[] privilege){
+		Role role = new Role();
+		role.setName(name);
+		role.setCreateTime(new Date());
+		List<Privilege> privileges = new ArrayList<>();
+
+		roleDao.save(role);
+		for(String pStr: privilege){
+			if(pStr.length() > 0) {
+				Privilege p = new Privilege();
+				p.setValue(pStr);
+				privileges.add(p);
+				p.setRole(role.getId());
+				privilegeDao.save(p);
+			}
+		}
+		role.setPrivilege(privileges);
+		sysLogService.addLog("4-1","添加角色" + name);
+		return role;
+	}
+
+	@Transactional
+	public boolean modifyRolePrivilege(int id, String[] privilege){
+		Role role = roleDao.find(id);
+		if(role == null)
+			return false;
+		Search search = new Search(Privilege.class);
+		search.addFilterEqual("role", id);
+
+		List<Privilege> origin = privilegeDao.search(search);
+
+		int len1 = privilege.length;
+		int len2 = origin.size();
+
+		for(int i = 0; i< len2; i++){
+			if(i<len1)
+				origin.get(i).setValue(privilege[i]);
+			else
+				privilegeDao.remove(origin.get(i));
+		}
+
+		for(int i=len2; i<len1; i++){
+			Privilege p = new Privilege();
+			p.setValue(privilege[i]);
+			p.setRole(id);
+			privilegeDao.save(p);
+		}
+
+		sysLogService.addLog("4-1","修改角色" + role.getName() + "权限");
+		return true;
+	}
+
+	@Transactional
+	public boolean modifyRoleName(int id, String name){
+		Role role = roleDao.find(id);
+		if(role == null)
+			return false;
+		String oldName = role.getName();
+		role.setName(name);
+		roleDao.save(role);
+		sysLogService.addLog("4-1","修改角色名" + oldName);
+		return true;
 	}
 }

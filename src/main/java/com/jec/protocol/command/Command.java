@@ -6,6 +6,10 @@ import java.util.List;
 import com.jec.protocol.pdu.PDU;
 
 public abstract class Command {
+
+	protected boolean result = false;
+
+	protected String errorText = "";
 	
 	public static interface Verifier {
 		public void verify(PDU request, PDU response) throws Exception;
@@ -96,5 +100,11 @@ public abstract class Command {
 		throw new RuntimeException(getClass().getSimpleName() + ": " + error);
 	}
 	
+	public boolean getResult(){
+		return result;
+	}
 
+	public String getErrorText() {
+		return errorText;
+	}
 }

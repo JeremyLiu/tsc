@@ -115,6 +115,41 @@
 		<property name="suffix" value=".jsp" />
 		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
 	</bean>
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/rest/" />
+		<!--<property name="serviceUrl" value="${cas.project.url}${adminPath}/cas" />-->
+		<!--&lt;!&ndash;<property name="loginUrl" value="${adminPath}/login" /> &ndash;&gt;-->
 
+		<!--<property name="successUrl" value="${adminPath}" />-->
+		<!--&lt;!&ndash;<property name="successUrl" value="/ConnServlet"/> &ndash;&gt;-->
+		<property name="filterChainDefinitions">
+			<value>
+				# some example chain definitions:
+				/rest/static/** = anon
+				/rest/user/login = anon
+				/rest/** = authc
+				# more URL-to-FilterChain definitions here
+			</value>
+		</property>
+	</bean>
+
+	<bean id="myShiroRealm" class="com.jec.module.inteceptor.MyShiroRealm">
+
+	</bean>
+
+	<!-- 定义Shiro安全管理配置 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="myShiroRealm" />
+	</bean>
+
+
+	<!--&lt;!&ndash; 保证实现了Shiro内部lifecycle函数的bean执行 &ndash;&gt;-->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+	<!--&lt;!&ndash; Enable Shiro Annotations for Spring-configured beans.  Only run after &ndash;&gt;-->
+	<!--&lt;!&ndash; the lifecycleBeanProcessor has run: &ndash;&gt;-->
+	<bean id="authorizationAttributeSourceAdvisor" class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager"/>
+	</bean>
 	<mvc:resources mapping="/static/**" location="/static/" cache-period="31536000"/>
 </beans>

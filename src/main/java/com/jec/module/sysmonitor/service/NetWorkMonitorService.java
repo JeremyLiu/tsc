@@ -53,10 +53,11 @@ public class NetWorkMonitorService {
             netUnit.setPort(port);
             netUnit.setCardCount(slotCount);
 
-            int id = netUnit.getId();
-            if(netUnitDao.find(id) != null)
+            int netId = NetUnit.getIdFromIp(ip);
+            if(netUnitDao.getNetUnitByNetId(netId) != null)
                 return -2;
 
+            netUnit.setNetId(netId);
             netUnitDao.save(netUnit);
 
             Card[] cards = new Card[slotCount];
@@ -84,21 +85,13 @@ public class NetWorkMonitorService {
         int newId = NetUnit.getIdFromIp(ip);
 
         //检查新的ip地址是否和其他的冲突
-        if(newId!=id && netUnitDao.find(newId) != null)
+        if(newId!=id && netUnitDao.getNetUnitByNetId(newId) != null)
             return -2;
 
         netUnit.setName(name);
         netUnit.setPort(port);
-
-        //如果修改了ip地址,相应的板卡和连接对应的id也需要改变
-        if(id != newId){
-            cardDao.updateNetUnit(id, newId);
-            netConnectDao.updateId(id, newId);
-
-            //TODO: 修改设备配置
-//            netUnit.setIp(ip);
-            netUnitDao.updateIp(ip,id);
-        }
+        netUnit.setNetId(newId);
+        netUnit.setIp(ip);
 
         //如果当前板卡数量比之前的数量少
         int diff = slotCount - netUnit.getCardCount();
@@ -295,6 +288,7 @@ public class NetWorkMonitorService {
         if(cardType == null)
             return false;
         card.setType(type);
+
 //        cardDao.save(card);
         return true;
     }

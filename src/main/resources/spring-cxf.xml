@@ -16,7 +16,7 @@
                   <!--serviceClass="com.jec.module.extern.Client_Service"-->
                   <!--address="http://localhost:8080/HelloWorld" />-->
     <!--<jaxws:inInterceptors>-->
-        <!--<bean id="soapPreInteceptor" class="com.jec.inteceptor.SoapPreInteceptor"/>-->
-        <!--<bean id="SoapPostInteceptor" class="com.jec.inteceptor.SoapPostInteceptor"/>-->
+        <!--<bean id="soapPreInteceptor" class="com.jec.module.inteceptor.SoapPreInteceptor"/>-->
+        <!--<bean id="SoapPostInteceptor" class="com.jec.module.inteceptor.SoapPostInteceptor"/>-->
     <!--</jaxws:inInterceptors>-->
 </beans>

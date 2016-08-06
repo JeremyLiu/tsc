@@ -1,4 +1,4 @@
-package com.jec.inteceptor;
+package com.jec.module.inteceptor;
 
 import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.interceptor.Fault;

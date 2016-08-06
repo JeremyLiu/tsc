@@ -1,5 +1,6 @@
 package com.jec.module.sysmonitor.controller;
 
+import com.jec.module.sysmanage.service.SysLogService;
 import com.jec.module.sysmonitor.service.DeviceStateService;
 import com.jec.module.sysmonitor.service.NetWorkMonitorService;
 import com.jec.module.sysmonitor.service.NetWorkStateService;
@@ -29,6 +30,9 @@ public class NetWorkMonitorController {
 
     @Resource
     private DeviceStateService deviceStateService;
+
+    @Resource
+    private SysLogService sysLogService;
 
     @RequestMapping(method = RequestMethod.POST, value = "netunit/create")
     public @ResponseBody
@@ -62,6 +66,7 @@ public class NetWorkMonitorController {
             return res;
         }
         res.status(Response.STATUS_SUCCESS).data(netUnitId);
+        sysLogService.addLog("1-0","添加网元" + name);
         return res;
     }
 
@@ -101,6 +106,7 @@ public class NetWorkMonitorController {
         }
 
         res.status(Response.STATUS_SUCCESS).data(netUnit);
+        sysLogService.addLog("1-0","修改网元" + name + "配置");
         return res;
     }
 
@@ -115,8 +121,9 @@ public class NetWorkMonitorController {
         if( destId <= 0 || srcId <=0 || slot <0 || port <0)
             return res;
         boolean result = netWorkMonitorService.saveNetConnect(srcId,destId,slot,port);
-        if(result)
+        if(result) {
             res.status(Response.STATUS_SUCCESS);
+        }
         return res;
     }
 
@@ -190,6 +197,13 @@ public class NetWorkMonitorController {
         else
             return Response.Builder(netWorkStateService.getInitState(netunit));
     }
+
+//    @RequestMapping(method = RequestMethod.GET, value = "/state/refresh")
+//    public @ResponseBody
+//    Response forRefreshState(){
+//        netWorkStateService.refreshCardSatate();
+//        return Response.Builder();
+//    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/card/type")
     public @ResponseBody

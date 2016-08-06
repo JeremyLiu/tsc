@@ -15,12 +15,12 @@ public class NetState implements Serializable{
     public static final int US_OUTLINE = 3;
 
 
-    public static final int CS_NORMAL = 0;
-    public static final int CS_FAILURE = 1;
+    public static final int CS_NORMAL = 1;
+    public static final int CS_FAILURE = 2;
 
     public static final int PS_DISABLED = -2;
-    public static final int PS_NORMAL = 0;
-    public static final int PS_FAILURE = 1;
+    public static final int PS_NORMAL = 1;
+    public static final int PS_FAILURE = 2;
 
 
     public static final int DS_NORMAL = 1;

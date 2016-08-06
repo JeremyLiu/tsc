@@ -30,7 +30,7 @@
     </filter-mapping>
     <!--<filter>-->
         <!--<filter-name>AuthFilter</filter-name>-->
-        <!--<filter-class>com.jec.inteceptor.AuthFilter</filter-class>-->
+        <!--<filter-class>com.jec.module.inteceptor.AuthFilter</filter-class>-->
         <!--<init-param>-->
             <!--<param-name>urlReg</param-name>-->
             <!--<param-value>(/user/?\w*)|(/)|(/static/?\w*)</param-value>-->

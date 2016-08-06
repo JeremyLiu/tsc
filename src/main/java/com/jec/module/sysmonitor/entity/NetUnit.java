@@ -17,6 +17,9 @@ public class NetUnit implements Serializable{
     @Column(name="id")
     private int id;
 
+    @Column(name="net_id")
+    private int netId;
+
     private String name;
 
     private String ip;
@@ -58,9 +61,16 @@ public class NetUnit implements Serializable{
 
     public void setIp(String ip) {
         this.ip = ip;
-        this.id = getIdFromIp(ip);
     }
 
+    @JsonIgnore
+    public int getNetId() {
+        return netId;
+    }
+
+    public void setNetId(int netId) {
+        this.netId = netId;
+    }
 
     @JsonIgnore
     public int getDeviceId() {

@@ -12,6 +12,7 @@ import com.jec.module.sysmonitor.dao.CardViewDao;
 import com.jec.module.sysmonitor.dao.NetUnitDao;
 import com.jec.module.sysmonitor.entity.*;
 import com.jec.module.sysmonitor.entity.view.CardView;
+import com.jec.protocol.command.SlotCommand;
 import com.jec.protocol.pdu.PDU;
 import com.jec.protocol.pdu.PduConstants;
 import com.jec.protocol.pdu.ProtocolUtils;
@@ -73,16 +74,6 @@ public class NetWorkStateService extends Thread implements Processor{
         this.start();
     }
 
-//    @Transactional(readOnly = true)
-//    public void syncNetUnit(){
-//        netUnits = netUnitDao.findAll();
-//    }
-
-
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-    private void getNetUnitState(){
-
-    }
     @Transactional(readOnly = true)
     public NetUnitState getInitState(int netUnitId){
         NetUnit netUnit =netUnitDao.find(netUnitId);
@@ -132,7 +123,7 @@ public class NetWorkStateService extends Thread implements Processor{
                 for(int j=0; j< portNumber; j++){
                     portStates[j] = new NetState();
                     portStates[j].setId(j);
-                    path = TopoState.buildPath(netUnitId,i,j);
+                    path = TopoState.buildPath(netUnitId,i+1,j+1);
                     if(states.containsKey(path)) {
                         int portState = states.get(path).getState();
                         portStates[j].setState(portState);
@@ -257,6 +248,37 @@ public class NetWorkStateService extends Thread implements Processor{
         search.addSort("slot",false);
     }
 
+    @Transactional(readOnly = true)
+    public void refreshCardSatate(NetUnit netUnit){
+        CommandExecutor ce = new CommandExecutor(false);
+        Search search = new Search(Card.class);
+        SlotCommand slotCommand = new SlotCommand(0,0,0,0);
+        ce.setRemoteAddress(netUnit.getIp(), netUnit.getPort());
+
+        search.addFilterEqual("netUnitId", netUnit.getId());
+        search.addFilterNotEqual("type", PduConstants.CARD_TYPE_NUL);
+
+        int mainSlot = -1;
+
+        List<Card> cards = cardDao.search(search);
+        for(Card card : cards){
+            if(card.getType() == PduConstants.CARD_TYPE_MCB){
+                mainSlot = card.getSlotNumber();
+                break;
+            }
+        }
+        slotCommand.setNetunit(netUnit.getNetId(),mainSlot);
+        for(Card card : cards){
+            slotCommand.setSlot(card.getSlotNumber(), card.getType());
+            ce.execute(slotCommand);
+            try{
+                Thread.sleep(50);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+
+    }
 
 //    private void setNetUnitState(int netUnit, int state){
 //        String path = TopoState.buildPath(netUnit);
@@ -269,34 +291,44 @@ public class NetWorkStateService extends Thread implements Processor{
 //        lock.writeLock().unlock();
 //    }
 
-    private  void setCardState(int netUnit, int slot, int state){
+    @Transactional(readOnly = true)
+    private  void setCardState(int netUnitId, int slot, int state){
+
+        NetUnit netUnit = netUnitDao.getNetUnitByNetId(netUnitId);
+        if(netUnit == null)
+            return;
+
         state = NetState.cardStateMap(state);
-        String path = TopoState.buildPath(netUnit,slot);
+        String path = TopoState.buildPath(netUnit.getId(),slot);
         lock.writeLock().lock();
         if(states.containsKey(path)){
             TopoState s = states.get(path);
             s.setState(state);
         }else
-            states.put(path,new TopoState(netUnit, slot,state));
+            states.put(path,new TopoState(netUnit.getId(), slot,state));
         lock.writeLock().unlock();
     }
 
-    private void setPortState(int netUnit, int slot, int port, int state){
+    @Transactional(readOnly = true)
+    private void setPortState(int netUnitId, int slot, int port, int state){
+        NetUnit netUnit = netUnitDao.getNetUnitByNetId(netUnitId);
+        if(netUnit == null)
+            return;
+
         state = NetState.deviceStateMap(state);
-        String path = TopoState.buildPath(netUnit,slot, port);
+        String path = TopoState.buildPath(netUnit.getId() ,slot, port);
         lock.writeLock().lock();
         if(states.containsKey(path)){
             TopoState s = states.get(path);
             s.setState(state);
         }else
-            states.put(path,new TopoState(netUnit, slot, port, state));
+            states.put(path,new TopoState(netUnit.getId(), slot, port, state));
         lock.writeLock().unlock();
     }
 
     @Override
     public boolean process(PDU pdu) {
-        if(pdu.length() != (PduConstants.LENGTH_OF_HEAD + 3))
-            return false;
+
 
         int type = ProtocolUtils.getCmdConfig(pdu);
 
@@ -341,7 +373,13 @@ public class NetWorkStateService extends Thread implements Processor{
                 //获取网元及设备的状态
                 for(NetUnit netUnit : netUnits) {
                     int netUnitState = getNetUnitState(netUnit);
-                    netUnitStates.put(netUnit.getId(), netUnitState);
+                    int netUnitId = netUnit.getId();
+                    Integer curState = netUnitStates.get(netUnitId);
+                    if( (curState == null || curState == NetState.UNKNOWN
+                            || curState == NetState.US_OUTLINE) && netUnitState == NetState.US_NORMAL){
+                        refreshCardSatate(netUnit);
+                    }
+                    netUnitStates.put(netUnitId, netUnitState);
                 }
             }catch (Exception ie){
                 ie.printStackTrace();

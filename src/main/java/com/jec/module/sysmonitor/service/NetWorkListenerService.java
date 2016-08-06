@@ -9,6 +9,7 @@ import com.jec.protocol.processor.RawProcessor;
 import com.jec.utils.NetWorkUtil;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -103,7 +104,7 @@ public class NetWorkListenerService{
 
     @PostConstruct
     public void startListen() {
-        exit = true;
+        exit = false;
         ListenerThread worker = new ListenerThread();
         worker.start();
     }
@@ -123,7 +124,7 @@ public class NetWorkListenerService{
                             NetWorkUtil.listenPort,
                             InetAddress.getByName(NetWorkUtil.getLocalHost()));
 
-                    socket.setSoTimeout(2000);
+                    socket.setSoTimeout(5000);
 
                 } catch (SocketException e) {
 
@@ -156,18 +157,37 @@ public class NetWorkListenerService{
 
             //debug.debug("创建监听套接字成功，地址：" + MonitorAddress.getMonitorHost() + " 端口：" + MonitorAddress.getMonitorPort());
 
-            byte[] buffer = new byte[1024 * 10];
 
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
 //            BufferedPdu pdu = new BufferedPdu();
-
+            boolean done = false;
+            TransactionSynchronizationManager.initSynchronization();
             while (!exit) {
 
                 try {
+                    byte[] buffer = new byte[1024 * 10];
 
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
-                    executor.submit(new Worker(packet));
+
+                    for (RawProcessor listener : listeners) {
+                        if (listener.process(packet)) {
+                            done = true;
+                            break;
+                        }
+                    }
+                    if (done)
+                        continue;
+
+                    byte[] data = packet.getData();
+                    int offset = packet.getOffset();
+                    int length = packet.getLength();
+                    BufferedPdu pdu = new BufferedPdu();
+                    pdu.setData(data, offset, length);
+
+                    // 解析
+                    parsePdu(pdu);
+//                    executor.submit(new Worker(packet));
                 } catch (SocketTimeoutException e) {
 
                     e.printStackTrace();
@@ -199,6 +219,7 @@ public class NetWorkListenerService{
         @Override
         public void run(){
             boolean done = false;
+            TransactionSynchronizationManager.initSynchronization();
             try {
                 for (RawProcessor listener : listeners) {
                     if (listener.process(packet)) {

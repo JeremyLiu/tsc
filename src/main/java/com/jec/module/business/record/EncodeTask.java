@@ -1,6 +1,7 @@
 package com.jec.module.business.record;
 
 import com.jec.base.core.PipeTask;
+import com.jec.module.business.entity.Record;
 import com.jec.module.business.entity.RecordSegment;
 import com.jec.protocol.unit.BytesWrap;
 import org.tritonus.share.sampled.TConversionTool;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * Created by jeremyliu on 6/19/16.
  */
-public class PcmTask extends PipeTask<BytesWrap>{
+public class EncodeTask extends PipeTask<BytesWrap>{
 
     private FileOutputStream fos;
 
@@ -35,7 +36,7 @@ public class PcmTask extends PipeTask<BytesWrap>{
     private final static long segmentSize = 5 * 1024 * 1024;
 
 
-    public PcmTask(String file, boolean isSegment){
+    public EncodeTask(String file, boolean isSegment){
         int	ind = file.lastIndexOf(".");
         if (ind == -1
                 || ind == file.length()
@@ -87,6 +88,11 @@ public class PcmTask extends PipeTask<BytesWrap>{
                 fos.close();
                 RecordSegment recordSegment = recordSegmentList.get(recordSegmentList.size()-1);
                 recordSegment.setPeriod(lastSegByte/16);
+                String pcmFile = recordSegment.getOriginFile();
+                File file = new File(pcmFile);
+                if(RecordEncode.encodeByLame(pcmFile,recordSegment.getTargetFile())){
+//                    file.delete();
+                }
                 return true;
             }
         } catch (IOException e) {

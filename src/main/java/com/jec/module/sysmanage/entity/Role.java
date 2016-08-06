@@ -29,7 +29,9 @@ public class Role implements Serializable{
     @Column(name="create_date")
     private Date createTime;
 
-    @OneToMany(targetEntity = Privilege.class, mappedBy = "role", fetch=FetchType.EAGER)
+    @OneToMany(targetEntity = Privilege.class,
+            mappedBy = "role", fetch=FetchType.EAGER,
+            cascade = {CascadeType.MERGE,CascadeType.REMOVE})
     private List<Privilege> privilege;
 
     public int getId() {
@@ -64,12 +66,12 @@ public class Role implements Serializable{
         this.privilege = privilege;
     }
 
-    public List<String> toValue(){
+    public String toValue(){
         if(privilege == null)
-            return new ArrayList<>();
-        List<String> values = new ArrayList<>(privilege.size());
+            return "";
+        String value = "";
         for(Privilege p : privilege)
-            values.add(p.getValue());
-        return values;
+            value += "," + p.getValue();
+        return value.substring(1);
     }
 }

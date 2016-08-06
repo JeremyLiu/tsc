@@ -1,10 +1,13 @@
 package com.jec.module.business.service;
 
+import com.jec.base.entity.NetState;
 import com.jec.module.business.entity.Business;
 import com.jec.module.business.entity.Meeting;
 import com.jec.module.business.entity.ShoreLine;
 import com.jec.module.business.entity.Threetalk;
 import com.jec.module.business.manage.*;
+import com.jec.module.sysmonitor.dao.NetUnitDao;
+import com.jec.module.sysmonitor.entity.NetUnit;
 import com.jec.module.sysmonitor.service.NetWorkListenerService;
 import com.jec.protocol.pdu.PDU;
 import com.jec.protocol.pdu.PduConstants;
@@ -12,6 +15,7 @@ import com.jec.protocol.pdu.ProtocolUtils;
 import com.jec.protocol.processor.Processor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -31,6 +35,9 @@ public class BusynessService implements Processor{
 
     @Resource
     private NetWorkListenerService netWorkListenerService;
+
+    @Resource
+    private NetUnitDao netUnitDao;
 
     @PostConstruct
     public void init(){
@@ -58,14 +65,29 @@ public class BusynessService implements Processor{
         }
     }
 
+    @Transactional
     public List getList(int type){
         BusinessManager businessManager = businessManagers.get(type);
         if( businessManager == null)
             return new ArrayList<>();
-        else
-            return businessManager.getEntries();
+        else {
+
+            List<NetState> entries =  businessManager.getEntries();
+            List<NetState> result = new ArrayList<>();
+
+            for(NetState entry: entries){
+                NetUnit netUnit = netUnitDao.getNetUnitByNetId(entry.getNetunit());
+                if(netUnit != null){
+                    entry.setNetunit(netUnit.getId());
+                    result.add(entry);
+                }
+            }
+
+            return result;
+        }
     }
 
+    @Transactional
     public List<Business> getBrief(){
         List<Business> businesses = new ArrayList<>();
         for(BusinessManager businessManager: businessManagers.values()){

@@ -4,16 +4,17 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.jec.base.annotation.SysLog;
 import com.jec.module.sysmanage.entity.Role;
+import com.jec.module.sysmanage.service.SysLogService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.jec.module.sysmanage.entity.User;
 import com.jec.module.sysmanage.service.UserService;
 import com.jec.utils.Response;
+
+import java.net.URLDecoder;
 
 @Controller
 @RequestMapping(value = "/user")
@@ -21,6 +22,9 @@ public class UserController {
 	
 	@Resource
 	private UserService userService;
+
+	@Resource
+	private SysLogService sysLogService;
 	
 	@RequestMapping(method = RequestMethod.POST, value = "login")
 	public @ResponseBody
@@ -32,8 +36,10 @@ public class UserController {
 		Response resp=Response.Builder(user);
 		if(user==null)
 			resp.message("用户名或密码错误！").status(1);
-		else
-			httpSession.setAttribute("userId",user.getId());
+		else {
+			httpSession.setAttribute("userId", user.getId());
+			sysLogService.addLog(user.getId(), "0", "用户"+username+"登录系统");
+		}
 		return resp;
 	}
 
@@ -61,6 +67,7 @@ public class UserController {
 
 	//修改密码
 	@RequestMapping(method = RequestMethod.POST, value = "password/modify")
+	@SysLog(action = "4-2", description = "修改密码")
 	public @ResponseBody
 	Response modifyPassword(
 			@RequestParam(value = "newPassword") String newPassword,
@@ -82,22 +89,30 @@ public class UserController {
 		user.setPassword(newPassword);
 		userService.saveUser(user);
 
-		return res;
+		return res.status(Response.STATUS_SUCCESS);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "modify")
 	public @ResponseBody
 	Response modifyUser(@RequestParam(value = "name", required = false) String name,
 						@RequestParam(value = "role", required = false) Integer role,
+						@RequestParam(value = "password", required = false) String password,
 						@RequestParam(value = "userId") int userId){
 		Response res = Response.Builder().status(Response.STATUS_PARAM_ERROR);
-		if(name.length() == 0 || name.length() > 60)
+		if(name != null && (name.length() == 0 || name.length() > 60))
 			return res.message("用户名不合法");
 
-		if(userService.exist(name))
+		User user = userService.getUser(userId);
+		if(user == null)
+			return res.message("用户不存在");
+
+		if(!user.getName().equals(name) && userService.exist(name))
 			return res.message("该用户名已被使用");
 
-		return res.status(Response.STATUS_SUCCESS).data(userService.modifyUser(userId,name, role));
+		if(password != null && (password.length() <= 0 || password.length()>30))
+			return res.message("密码不能为空,且不能超过30个字符");
+
+		return res.status(Response.STATUS_SUCCESS).data(userService.modifyUser(userId,name, role, password));
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "remove")
@@ -114,6 +129,17 @@ public class UserController {
 		return Response.Builder(userService.getAllRoles());
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "role/create")
+	public @ResponseBody
+	Response addRole(@RequestParam(value = "name") String name,
+						@RequestParam(value = "privilege", required = false, defaultValue = "") String privilege){
+		Response res = Response.Builder().status(Response.STATUS_PARAM_ERROR);
+		if(name.length() == 0 || name.length()>60)
+			return res.message("角色名不合法");
+
+		return res.status(Response.STATUS_SUCCESS).data(userService.addUserRole(name,privilege.split(",")));
+	}
+
 	@RequestMapping(method = RequestMethod.DELETE, value = "role/remove")
 	public @ResponseBody
 	Response removeRole(@RequestParam(value = "id") int id){
@@ -123,5 +149,29 @@ public class UserController {
 			return res.status(Response.STATUS_PARAM_ERROR).message("该角色已分配给用户,无法删除");
 		else
 			return res.data(true);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "role/modify", consumes = "application/json;charset=UTF-8")
+	public @ResponseBody
+	Response modifyRole(@RequestBody(required = false) String[] privilege,
+						@RequestParam(value = "id") int id,
+						@RequestParam(value = "name", required = false) String name){
+		boolean result = true;
+		Response res = Response.Builder();
+		if(privilege != null)
+			result = userService.modifyRolePrivilege(id, privilege) && result;
+		if(name != null){
+			try {
+				name = new String(name.getBytes("ISO-8859-1"), "UTF-8");
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			if(name.length() == 0 || name.length() > 60)
+				return res.status(Response.STATUS_PARAM_ERROR).message("名字不合法");
+			else
+				result = result && userService.modifyRoleName(id, name);
+		}
+
+		return res.data(result);
 	}
 }

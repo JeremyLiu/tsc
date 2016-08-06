@@ -46,6 +46,7 @@ public class NetworkDeviceService {
         terminalDevice.setName(name);
         terminalDevice.setCardId(slot);
         terminalDevice.setCardPort(port);
+        terminalDevice.setNetUnitId(netUnitId);
 
         terminalDeviceDao.save(terminalDevice);
         return terminalDevice.getId();

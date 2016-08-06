@@ -1,5 +1,6 @@
 package com.jec.module.sysmanage.controller;
 
+import com.jec.base.annotation.SysLog;
 import com.jec.module.extern.Client_Service;
 import com.jec.module.extern.impl.NTNMS_ServiceImpl;
 import com.jec.module.sysmanage.entity.Role;
@@ -12,8 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Endpoint;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -41,6 +45,16 @@ public class RootController {
             Role role = userService.getUserRole(userId);
             model.addAttribute("role", role.toValue());
             return "index";
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "logout")
+    public void logout(HttpServletResponse response, HttpSession httpSession){
+        httpSession.removeAttribute("userId");
+        try {
+            response.sendRedirect("");
+        }catch (IOException e){
+            e.printStackTrace();
         }
     }
 

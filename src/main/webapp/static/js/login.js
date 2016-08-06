@@ -1,11 +1,6 @@
-$('#loginBtn').click(function(){
-
+function loginSubmit(){
     var name = $('#name').val();
     var password = $('#password').val();
-//    var postData = {
-//        username: name,
-//        password: password
-//    }
     var postData = new FormData();
     postData.append('username', name);
     postData.append('password', password);
@@ -29,4 +24,11 @@ $('#loginBtn').click(function(){
         }
 
     });
+}
+
+$('#loginBtn').click(loginSubmit);
+
+$('#password').keydown(function(event){
+    if(event.keyCode == 13)
+        loginSubmit();
 });

@@ -9,6 +9,7 @@ import java.util.Date;
 public class DateTimeUtils {
 
 	private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	private static DateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public DateTimeUtils() {
 		// TODO Auto-generated constructor stub
@@ -31,6 +32,14 @@ public class DateTimeUtils {
 	public static Date String2Date(String date){
 		try{
 			return df.parse(date);
+		}catch (ParseException e){
+			return null;
+		}
+	}
+
+	public static Date String2DateTime(String date){
+		try{
+			return dtf.parse(date);
 		}catch (ParseException e){
 			return null;
 		}

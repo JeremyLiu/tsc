@@ -1,5 +1,6 @@
 package com.jec.module.business.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jec.utils.Constants;
 import com.jec.utils.DateTimeUtils;
@@ -32,7 +33,7 @@ public class Record implements Serializable{
     private String calledNumber;
 
     @Column(name="start_time")
-    private long startTime;
+    private Date startTime;
 
     @Column(name="period_time")
     private long period;
@@ -67,12 +68,18 @@ public class Record implements Serializable{
         this.calledNumber = calledNumber;
     }
 
-    public long getStartTime() {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+
+    public void setStartTime(Date startTime){
         this.startTime = startTime;
+    }
+
+    public void setStartTime(long startTime){
+        this.startTime = new Date(startTime);
     }
 
     public long getPeriod() {

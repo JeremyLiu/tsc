@@ -1,6 +1,5 @@
 package com.jec.module.business.record;
 
-import com.jec.base.core.PipeTask;
 import com.jec.module.business.entity.Record;
 import com.jec.module.business.entity.RecordSegment;
 import com.jec.protocol.unit.BytesWrap;
@@ -8,7 +7,6 @@ import com.jec.utils.Constants;
 import com.jec.utils.XmlUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +27,7 @@ public class RecordSession extends Thread{
 
     private boolean exit = true;
 
-    private PcmTask pcmTask;
+    private EncodeTask encodeTask;
 
     private int sessionId;
 
@@ -37,10 +35,10 @@ public class RecordSession extends Thread{
     public RecordSession(int id, String callingNumber, String calledNumber){
         record = new Record();
         record.setFilePath(id);
-
+        record.setId(id);
         record.setCallingNumber(callingNumber);
         record.setCalledNumber(calledNumber);
-        pcmTask = new PcmTask(record.getPcmFile(), true);
+        encodeTask = new EncodeTask(record.getPcmFile(), true);
         this.sessionId = id;
     }
 
@@ -64,6 +62,10 @@ public class RecordSession extends Thread{
         }
     }
 
+    public List<RecordSegment>  getRecordSegement(){
+        return encodeTask.getRecordSegmentList();
+    }
+
     public void openSession(){
         exit = false;
         record.setStartTime(System.currentTimeMillis());
@@ -81,7 +83,7 @@ public class RecordSession extends Thread{
 
     @Override
     public void run(){
-        if(!pcmTask.prepare()){
+        if(!encodeTask.prepare()){
             exit = true;
             notifyClose();
             return;
@@ -101,27 +103,16 @@ public class RecordSession extends Thread{
                 }
                 BytesWrap data = queue.remove();
                 //数据为0 或者写入失败结束session
-                if(data.length() == 0 || !pcmTask.work(data))
+                if(data.length() == 0 || !encodeTask.work(data))
                     break;
-                record.setPeriod(pcmTask.getRecordTime());
+                record.setPeriod(encodeTask.getRecordTime());
             }
         }while(!exit || !queue.isEmpty());
 
-        pcmTask.done();
+        encodeTask.done();
 
-        List<RecordSegment> segments = pcmTask.getRecordSegmentList();
+        List<RecordSegment> segments = encodeTask.getRecordSegmentList();
         record.setSegments(segments);
-
-        //压缩编码
-        for(RecordSegment segment : segments) {
-            String pcmFile = segment.getOriginFile();
-            File file = new File(pcmFile);
-
-            //编码成功后删除原始文件
-            if(RecordEncode.encode(file.getAbsolutePath(), segment.getTargetFile())>0){
-                file.delete();
-            }
-        }
 
         //写配置文件
         if(XmlUtils.writeXml(record.getXmlFile(),segments,RecordSegment.class))
