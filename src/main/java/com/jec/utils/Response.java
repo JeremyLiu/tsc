@@ -15,6 +15,8 @@ public class Response extends HashMap<String,Object> implements Serializable{
 	public final static int STATUS_SUCCESS = 0;
 	public final static int STATUS_PARAM_ERROR = 1;
 	public final static int STATUS_SYS_ERROR = 2;
+	public final static int STATUS_PARTIAL_SUCCESS = 3;
+	public final static int PRIVILEGE_INSUFFICIENT = 4;
 
 	public static Response Builder(Object entity)
 	{

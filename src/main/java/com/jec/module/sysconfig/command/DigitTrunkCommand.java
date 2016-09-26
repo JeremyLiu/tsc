@@ -1,6 +1,6 @@
 package com.jec.module.sysconfig.command;
 
-import com.jec.module.sysconfig.entity.MeetingConfig;
+import com.jec.module.sysconfig.entity.DigitTrunk;
 import com.jec.protocol.command.Command;
 import com.jec.protocol.pdu.PDU;
 import com.jec.protocol.pdu.PduConstants;
@@ -10,28 +10,32 @@ import com.jec.protocol.pdu.implement.IncreasedPduBuilder;
 import com.jec.protocol.unit.BCD;
 
 /**
- * Created by jeremyliu on 7/2/16.
+ * Created by jeremyliu on 9/26/16.
  */
-public class MeetingCommand extends Command {
+public class DigitTrunkCommand extends Command {
 
-    private MeetingConfig config;
+    private DigitTrunk digitTrunk;
 
     private int mainSlot;
 
     private int netId;
 
-    public MeetingCommand(int netId, MeetingConfig meetingConfig, int mainSlot){
-        this.config = meetingConfig;
+    public DigitTrunkCommand(){
+
+    }
+
+    public DigitTrunkCommand(DigitTrunk digitTrunk, int mainSlot, int netId){
+        this.digitTrunk = digitTrunk;
         this.mainSlot = mainSlot;
         this.netId = netId;
     }
 
-    public MeetingConfig getConfig() {
-        return config;
+    public DigitTrunk getDigitTrunk() {
+        return digitTrunk;
     }
 
-    public void setConfig(MeetingConfig config) {
-        this.config = config;
+    public void setDigitTrunk(DigitTrunk digitTrunk) {
+        this.digitTrunk = digitTrunk;
     }
 
     public int getMainSlot() {
@@ -42,37 +46,29 @@ public class MeetingCommand extends Command {
         this.mainSlot = mainSlot;
     }
 
+    public int getNetId() {
+        return netId;
+    }
+
+    public void setNetId(int netId) {
+        this.netId = netId;
+    }
+
     @Override
     public PDU buildRequestPdu() throws Exception {
-        // 报内容
+
         IncreasedPduBuilder pbContent = new IncreasedPduBuilder();
         pbContent.addInteger8(SNGenerator.nextSN());
-        pbContent.addInteger8(0x03);
+        pbContent.addInteger8(PduConstants.CMD_TYPE_YWPZ);
         pbContent.addInteger8(0x01);
-        pbContent.addInteger8(0x04);
-        pbContent.addInteger8(0x01);
+        pbContent.addInteger8(PduConstants.CONFIG_TYPE_DIGITTRUNK);
+        pbContent.addInteger8(PduConstants.CARD_TYPE_DRB);
         pbContent.addInteger8(mainSlot);
+        pbContent.addInteger8(netId);
+        pbContent.addInteger8(digitTrunk.getSlot());
+        pbContent.addInteger8(digitTrunk.getPort());
 
-        pbContent.addBCD(BCD.fromString(config.getCode()), PduConstants.LENGTH_OF_BCD);
-
-        pbContent.addString(config.getName(), PduConstants.LENGTH_OF_STR);
-
-        String[] users = config.getUsers();
-        String[] members = config.getMembers();
-
-        pbContent.addInteger8(users.length);
-        for(String user: users) {
-            if(!user.equals(""))
-                pbContent.addBCD(BCD.fromString(user), PduConstants.LENGTH_OF_BCD);
-        }
-
-
-        pbContent.addInteger8(members.length);
-        for(String member: members) {
-            if(!member.equals(""))
-                pbContent.addBCD(BCD.fromString(member), PduConstants.LENGTH_OF_BCD);
-        }
-
+        //TODO: 设置opc,dpc,cic等值
 
         // 报文头
         IncreasedPduBuilder pb = new IncreasedPduBuilder();

@@ -48,7 +48,7 @@ public class LogController {
         return resp.data(sysLogService.fetchLog(start, pageSize, startDate, endDate, searchKey));
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, consumes = "application/json;charset=UTF-8")
+    @RequestMapping(value="remove", method = RequestMethod.DELETE, consumes = "application/json;charset=UTF-8")
     public @ResponseBody
     Response removeLog(@RequestBody Integer[] ids){
         Response resp = Response.Builder();
@@ -56,7 +56,7 @@ public class LogController {
             sysLogService.batchRemoveLog(ids);
             return resp;
         }catch (Exception e){
-            return resp.status(Response.STATUS_SYS_ERROR).data(false).message(e.getMessage());
+            return resp.status(Response.STATUS_SYS_ERROR).message(e.getMessage());
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.jec.protocol.pdu;
 
 public class PduConstants {
-	
 	/*
 	 * 默认网络端口
 	 */
@@ -28,9 +27,9 @@ public class PduConstants {
 	public static final int CARD_TYPE_MCB = (byte)0x01; //主控板
 	public static final int CARD_TYPE_DUB = (byte)0x02; //数字用户板
 	public static final int CARD_TYPE_SUB = (byte)0x03; //模拟用户板
-	public static final int CARD_TYPE_ACB = (byte)0x04; //接入控制板
+	//public static final int CARD_TYPE_ACB = (byte)0x04; //接入控制板
 	public static final int CARD_TYPE_ENB = (byte)0x05; //以太网板
-	public static final int CARD_TYPE_DRB = (byte)0x06; //数字中继板
+	public static final int CARD_TYPE_DRB = (byte)0x04; //数字中继板
 	public static final int CARD_TYPE_SRB = (byte)0x08; //录音板
 	public static final int CARD_TYPE_OTB = (byte)0x0A; //光传输板
 	
@@ -51,6 +50,11 @@ public class PduConstants {
 	
 	public static final int CMD_TYPE_REPORT_ADDR = (byte)0x0a; //上报地址
 
+	/*
+		配置类型
+	 */
+	public static final int CONFIG_TYPE_DIGITTRUNK = (byte)0x08;
+	public static final int CONFIG_TYPE_MEETING = (byte)0x04;
 
 	/*
 		响应报文配置参数

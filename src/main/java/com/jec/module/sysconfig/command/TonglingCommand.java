@@ -17,13 +17,12 @@ public class TonglingCommand extends Command {
 
     private int mainSlot;
 
-    public TonglingCommand(){
+    private int netId;
 
-    }
-
-    public TonglingCommand(TonglingConfig config, int mainSlot){
+    public TonglingCommand(int netId, TonglingConfig config, int mainSlot){
         this.mainSlot = mainSlot;
         this.config = config;
+        this.netId = netId;
     }
 
 
@@ -68,7 +67,7 @@ public class TonglingCommand extends Command {
         // 报文头
         IncreasedPduBuilder pb = new IncreasedPduBuilder();
         pb.addInteger8(0);
-        pb.addInteger8(config.getNetunit());
+        pb.addInteger8(netId);
         pb.addInteger8(PduConstants.ID_LOCAL);
         pb.addInteger8(PduConstants.PROTOCOL_TYPE);
         pb.addInteger16(pbContent.size());

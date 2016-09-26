@@ -138,7 +138,7 @@ public class NetWorkMonitorController {
     public @ResponseBody
     Response getCardSlot(
             @RequestParam(value="netunit") int netunit,
-            @RequestParam(value="type") int type){
+            @RequestParam(value="type", required = false, defaultValue = "-1") int type){
         return Response.Builder(netWorkMonitorService.getNetUnitCardSlot(netunit,type));
     }
 

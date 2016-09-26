@@ -280,16 +280,9 @@ public class NetWorkStateService extends Thread implements Processor{
 
     }
 
-//    private void setNetUnitState(int netUnit, int state){
-//        String path = TopoState.buildPath(netUnit);
-//        lock.writeLock().lock();
-//        if(states.containsKey(path)){
-//            TopoState s = states.get(path);
-//            s.setState(state);
-//        }else
-//            states.put(path,new TopoState(netUnit, state));
-//        lock.writeLock().unlock();
-//    }
+    public boolean isOnline(int netUnit){
+        return netUnitStates.get(netUnit) == NetState.US_NORMAL;
+    }
 
     @Transactional(readOnly = true)
     private  void setCardState(int netUnitId, int slot, int state){

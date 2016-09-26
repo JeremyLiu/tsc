@@ -76,7 +76,6 @@ public class PduCommand extends Command{
 
     @Override
     public void processResponsePdu(PDU pdu) throws Exception {
-        System.out.println();
         int code = ProtocolUtils.getCmdCode(pdu);
         result = (code == PduConstants.CMD_CODE_REPORT_ADDR_REG_ACK);
     }

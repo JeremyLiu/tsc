@@ -16,13 +16,12 @@ public class ClockCommand extends Command {
 
     private int mainSlot;
 
-    public ClockCommand(){
+    private int netId;
 
-    }
-
-    public ClockCommand(Clock clock, int mainSlot){
+    public ClockCommand(int netId, Clock clock, int mainSlot){
         this.clock = clock;
         this.mainSlot = mainSlot;
+        this.netId = netId;
     }
 
     public int getMainSlot() {
@@ -39,6 +38,14 @@ public class ClockCommand extends Command {
 
     public void setClock(Clock clock) {
         this.clock = clock;
+    }
+
+    public int getNetId() {
+        return netId;
+    }
+
+    public void setNetId(int netId) {
+        this.netId = netId;
     }
 
     @Override
@@ -64,7 +71,7 @@ public class ClockCommand extends Command {
 
         IncreasedPduBuilder head = new IncreasedPduBuilder();
         head.addInteger8(0);
-        head.addInteger8(clock.getNetunit());
+        head.addInteger8(netId);
         head.addInteger8(PduConstants.ID_LOCAL);
         head.addInteger8(PduConstants.PROTOCOL_TYPE);
         head.addInteger16(builder.size());

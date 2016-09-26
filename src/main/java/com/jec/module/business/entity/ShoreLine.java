@@ -3,7 +3,6 @@ package com.jec.module.business.entity;
 
 import com.jec.base.entity.NetState;
 import com.jec.protocol.unit.BCD;
-import sun.nio.ch.Net;
 
 import java.io.Serializable;
 

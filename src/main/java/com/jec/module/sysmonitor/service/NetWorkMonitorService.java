@@ -335,7 +335,8 @@ public class NetWorkMonitorService {
     public List<CardView> getNetUnitCardSlot(int netunit, int type){
         Search search = new Search(CardView.class);
         search.addFilterEqual("netUnitId", netunit);
-        search.addFilterEqual("code", type);
+        if(type>=0)
+            search.addFilterEqual("code", type);
         return cardViewDao.search(search);
     }
 }

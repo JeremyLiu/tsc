@@ -8,19 +8,18 @@ import com.jec.protocol.pdu.implement.IncreasedPduBuilder;
 
 /**
  * Created by jeremyliu on 7/1/16.
+ * 下载板卡类型配置命令
  */
 public class CardTypeCommand extends Command {
 
     private int netunit;
-    private int type;
-    private int slot;
+    private int mainSlot;
     private int destSlot;
     private int destType;
 
-    public CardTypeCommand(int netunit, int type, int slot, int destSlot, int destType){
+    public CardTypeCommand(int netunit, int mainSlot, int destSlot, int destType){
         this.netunit = netunit;
-        this.type = type;
-        this.slot = slot;
+        this.mainSlot = mainSlot;
         this.destSlot = destSlot;
         this.destType = destType;
     }
@@ -33,20 +32,12 @@ public class CardTypeCommand extends Command {
         this.netunit = netunit;
     }
 
-    public int getType() {
-        return type;
+    public int getMainSlot() {
+        return mainSlot;
     }
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public int getSlot() {
-        return slot;
-    }
-
-    public void setSlot(int slot) {
-        this.slot = slot;
+    public void setMainSlot(int mainSlot) {
+        this.mainSlot = mainSlot;
     }
 
     public int getDestSlot() {
@@ -72,8 +63,8 @@ public class CardTypeCommand extends Command {
         builder.addInteger8(PduConstants.CMD_TYPE_SBPZ);
         builder.addInteger8(PduConstants.CMD_CODE_SZCS);
         builder.addInteger8(0x03);
-        builder.addInteger8(type);
-        builder.addInteger8(slot);
+        builder.addInteger8(PduConstants.CARD_TYPE_MCB);
+        builder.addInteger8(mainSlot);
 
         builder.addInteger8(destSlot);
         builder.addInteger8(destType);

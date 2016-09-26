@@ -1,5 +1,8 @@
 package com.jec.module.sysconfig.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jec.utils.Response;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -12,35 +15,52 @@ import java.util.Date;
  */
 @Entity
 @Table(name="zhwg_config_clock")
-public class Clock implements Serializable {
+public class Clock implements Serializable, NetUnitConfig {
 
     @Id
     @Column(name="element_id")
     private int netunit;
 
-    private int type1;
+    private int type1=-1;
 
-    private int slot1;
+    private int slot1=-1;
 
-    private int port1;
+    private int port1=-1;
 
-    private int type2;
+    private int type2=-1;
 
-    private int slot2;
+    private int slot2=-1;
 
-    private int port2;
+    private int port2=-1;
 
-    private int type3;
+    private int type3=-1;
 
-    private int slot3;
+    private int slot3=-1;
 
-    private int port3;
+    private int port3=-1;
 
     @Column(name="update_date")
-    private Date updateDate = new Date();
+    private Date updateDate;
 
     public int getNetunit() {
         return netunit;
+    }
+
+    @Override
+    public Response validate() {
+        Response resp = Response.Builder().status(Response.STATUS_PARAM_ERROR);
+        if(slot1<0 || port1<0)
+            return resp.message("主时钟设置不能为空");
+        if(slot2<0 || port2<0)
+            return resp.message("备时钟1设置不能为空");
+        if(slot3<0 || port3<0)
+            return resp.message("备时钟2设置不能为空");
+        return resp.status(Response.STATUS_SUCCESS);
+    }
+
+    @Override
+    public void setUpdateDate() {
+        updateDate = new Date();
     }
 
     public void setNetunit(int netunit) {
@@ -119,6 +139,7 @@ public class Clock implements Serializable {
         this.port3 = port3;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     public Date getUpdateDate() {
         return updateDate;
     }

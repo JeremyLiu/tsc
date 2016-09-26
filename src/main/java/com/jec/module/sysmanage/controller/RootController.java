@@ -38,6 +38,7 @@ public class RootController {
 
     @RequestMapping(method = RequestMethod.GET)
     public String main(HttpSession httpSession, Model model){
+
         Integer userId = (Integer)httpSession.getAttribute("userId");
         if(userId == null)
             return "login";

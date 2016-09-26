@@ -46,4 +46,11 @@ public class CardDao extends BaseDao<Card,Integer> implements GenericDAO<Card,In
         return searchUnique(search);
     }
 
+    public Card getCardBySlot(int netunit, int slot){
+        Search search = new Search(Card.class);
+        search.addFilterEqual("netUnitId", netunit);
+        search.addFilterEqual("slotNumber", slot);
+        return searchUnique(search);
+    }
+
 }
