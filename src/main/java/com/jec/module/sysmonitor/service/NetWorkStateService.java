@@ -123,7 +123,7 @@ public class NetWorkStateService extends Thread implements Processor{
                 for(int j=0; j< portNumber; j++){
                     portStates[j] = new NetState();
                     portStates[j].setId(j);
-                    path = TopoState.buildPath(netUnitId,i+1,j+1);
+                    path = TopoState.buildPath(netUnitId,i+1,j);
                     if(states.containsKey(path)) {
                         int portState = states.get(path).getState();
                         portStates[j].setState(portState);
@@ -205,15 +205,15 @@ public class NetWorkStateService extends Thread implements Processor{
         }
         for(NetConnect topo : topos){
 
-            int srcId = topo.getSrcId();
+            int destId = topo.getDestId();
             ConnectState connectState = ConnectState.from(topo);
-            Integer netState = netUnitStates.get(srcId);
+            Integer netState = netUnitStates.get(topo.getSrcId());
             if(netState == null)
                 netState = NetState.UNKNOWN;
             if(netState != NetState.US_NORMAL)
                 connectState.setState(netState);
             else {
-                String path = TopoState.buildPath(srcId, topo.getSlot(), topo.getPort());
+                String path = TopoState.buildPath(destId, topo.getSlot(), topo.getPort());
                 lock.readLock().lock();
                 if(states.containsKey(path))
                     connectState.setState(states.get(path).getState());
@@ -223,7 +223,7 @@ public class NetWorkStateService extends Thread implements Processor{
             }
             boolean find = false;
             for(ConnectState origin: connectStates){
-                if(origin.getSrcId() == srcId && origin.getDestId() == topo.getDestId()){
+                if(origin.getSrcId() == topo.getSrcId() && origin.getDestId() == topo.getDestId()){
                     find = true;
                     origin = connectState;
                     break;
@@ -249,8 +249,8 @@ public class NetWorkStateService extends Thread implements Processor{
     }
 
     @Transactional(readOnly = true)
-    public void refreshCardSatate(NetUnit netUnit){
-        CommandExecutor ce = new CommandExecutor(false);
+    public void refreshCardState(NetUnit netUnit){
+        CommandExecutor ce = new CommandExecutor();
         Search search = new Search(Card.class);
         SlotCommand slotCommand = new SlotCommand(0,0,0,0);
         ce.setRemoteAddress(netUnit.getIp(), netUnit.getPort());
@@ -281,7 +281,8 @@ public class NetWorkStateService extends Thread implements Processor{
     }
 
     public boolean isOnline(int netUnit){
-        return netUnitStates.get(netUnit) == NetState.US_NORMAL;
+        int state = netUnitStates.get(netUnit);
+        return  state== NetState.US_NORMAL || state ==NetState.US_FAILURE;
     }
 
     @Transactional(readOnly = true)
@@ -308,7 +309,7 @@ public class NetWorkStateService extends Thread implements Processor{
         if(netUnit == null)
             return;
 
-        state = NetState.deviceStateMap(state);
+        state = NetState.portStateMap(state);
         String path = TopoState.buildPath(netUnit.getId() ,slot, port);
         lock.writeLock().lock();
         if(states.containsKey(path)){
@@ -350,6 +351,7 @@ public class NetWorkStateService extends Thread implements Processor{
             offset += PduConstants.LENGTH_OF_BCD;
 
             int stateCode = pdu.getInt8(offset);
+            deviceStateService.setDeviceState(number.toString(), stateCode);
             System.out.println("device:"+number.toString()+",state:"+stateCode);
         }
         return false;
@@ -368,9 +370,11 @@ public class NetWorkStateService extends Thread implements Processor{
                     int netUnitState = getNetUnitState(netUnit);
                     int netUnitId = netUnit.getId();
                     Integer curState = netUnitStates.get(netUnitId);
-                    if( (curState == null || curState == NetState.UNKNOWN
-                            || curState == NetState.US_OUTLINE) && netUnitState == NetState.US_NORMAL){
-                        refreshCardSatate(netUnit);
+                    if( (netUnitState == NetState.US_NORMAL || netUnitState == NetState.US_FAILURE)
+                            && (curState == null || curState == NetState.US_OUTLINE
+                            || curState == NetState.UNKNOWN)){
+                        refreshCardState(netUnit);
+                        deviceStateService.refreshState(netUnit);
                     }
                     netUnitStates.put(netUnitId, netUnitState);
                 }
@@ -378,5 +382,27 @@ public class NetWorkStateService extends Thread implements Processor{
                 ie.printStackTrace();
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public void refreshAll(){
+        List<NetUnit> netUnits = netUnitDao.findAll();
+        //获取网元及设备的状态
+        for(NetUnit netUnit : netUnits) {
+            if(isOnline(netUnit.getId())) {
+                refreshCardState(netUnit);
+                deviceStateService.refreshState(netUnit);
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean refresh(int netunit){
+        NetUnit netUnit = netUnitDao.find(netunit);
+        if(netUnit == null)
+            return false;
+        refreshCardState(netUnit);
+        deviceStateService.refreshState(netUnit);
+        return true;
     }
 }

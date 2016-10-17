@@ -21,6 +21,9 @@ public class DevicePort implements Serializable{
 
     private String function;
 
+    private boolean enable;
+
+    private String number;
 
     public int getId() {
         return id;
@@ -45,5 +48,21 @@ public class DevicePort implements Serializable{
 
     public void setFunction(String function) {
         this.function = function;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

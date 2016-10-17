@@ -1,11 +1,14 @@
 package com.jec.module.sysmonitor.dao;
 
 import com.googlecode.genericdao.dao.hibernate.GenericDAO;
+import com.googlecode.genericdao.search.Search;
 import com.jec.base.dao.BaseDao;
+import com.jec.module.sysmonitor.entity.NetUnit;
 import com.jec.module.sysmonitor.entity.TerminalDevice;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,4 +35,15 @@ public class TerminalDeviceDao extends BaseDao<TerminalDevice,Integer> implement
         return this.updateSQLQuery(sql, params);
     }
 
+    public List<TerminalDevice> findByNetunit(int netunit){
+        Search search = new Search(TerminalDevice.class);
+        search.addFilterEqual("netUnitId", netunit);
+        return search(search);
+    }
+
+    public TerminalDevice findByCode(String code){
+        Search search = new Search(TerminalDevice.class);
+        search.addFilterEqual("code", code);
+        return searchUnique(search);
+    }
 }

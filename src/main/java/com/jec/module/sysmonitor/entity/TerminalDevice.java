@@ -20,19 +20,13 @@ public class TerminalDevice implements Serializable{
     @GenericGenerator(name="increment",strategy="increment")
     private int id;
 
-    @Column(name="card_id")
-    private int cardId;
-
-    @Column(name="card_port")
-    private int cardPort;
-
     @Column(name="element_id")
     private int netUnitId;
 
     private String name;
-//
-//    @OneToMany(targetEntity = DevicePort.class, mappedBy = "deviceId")
-//    private List<DevicePort> ports = new ArrayList<>();
+
+    @Column(name="code")
+    private String code;
 
     public int getId() {
         return id;
@@ -42,29 +36,20 @@ public class TerminalDevice implements Serializable{
         this.id = id;
     }
 
-    @JsonIgnore
-    public int getCardId() {
-        return cardId;
-    }
-
-    public void setCardId(int cardId) {
-        this.cardId = cardId;
-    }
-
-    public int getCardPort() {
-        return cardPort;
-    }
-
-    public void setCardPort(int cardPort) {
-        this.cardPort = cardPort;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public int getNetUnitId() {

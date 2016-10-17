@@ -1,12 +1,11 @@
 package com.jec.module.business.controller;
 
 import com.jec.module.business.entity.RecordSegment;
-import com.jec.module.business.service.BusynessService;
+import com.jec.module.business.service.BusinessService;
 import com.jec.module.business.service.RecordService;
 import com.jec.utils.DateTimeUtils;
 import com.jec.utils.DownloadUtils;
 import com.jec.utils.Response;
-import jdk.nashorn.internal.ir.annotations.Reference;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +27,7 @@ public class BusynessController {
     private  final static int pageSize = 10;
 
     @Resource
-    private BusynessService busynessService;
+    private BusinessService businessService;
 
     @Resource
     private RecordService recordService;
@@ -37,13 +36,13 @@ public class BusynessController {
     @RequestMapping(method = RequestMethod.GET, value="list")
     public @ResponseBody
     Response getBusinessList(@RequestParam(value="type") int type){
-        return Response.Builder(busynessService.getList(type));
+        return Response.Builder(businessService.getList(type));
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public @ResponseBody
     Response index(){
-        return Response.Builder(busynessService.getBrief());
+        return Response.Builder(businessService.getBrief());
     }
 
     @RequestMapping(method = RequestMethod.GET, value="record/{state}")

@@ -1,5 +1,8 @@
 package com.jec.protocol.pdu;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class PduConstants {
 	/*
 	 * 默认网络端口
@@ -53,8 +56,15 @@ public class PduConstants {
 	/*
 		配置类型
 	 */
-	public static final int CONFIG_TYPE_DIGITTRUNK = (byte)0x08;
+	public static final int CONFIG_TYPE_DIGITTRUNK = (byte)0x14;
 	public static final int CONFIG_TYPE_MEETING = (byte)0x04;
+	public static final int CONFIG_TYPE_USERDATE = (byte)0x02;
+	public static final int CONFIG_TYPE_BROADCAST = (byte)0x05;
+	public static final int CONFIG_TYPE_PHONESTATION = (byte)0x06;
+	public static final int CONFIG_TYPE_TONGLING = (byte)0x03;
+	public static final int CONFIG_TYPE_VDR = (byte)0x07;
+	public static final int CONFIG_TYPE_TERMINAL_KEY = (byte)0x09;
+	public static final int CONFIG_TYPE_TERMINAL_BUSINESS = (byte)0x0B;
 
 	/*
 		响应报文配置参数
@@ -102,7 +112,13 @@ public class PduConstants {
 	public static final int CMD_CODE_HANGUP = 		(byte)0x01; //拆链
 	public static final int CMD_CODE_HANGUP_ACK = 	(byte)0x02; //拆链回应
 
-	
+
+	public static final Map<Integer, Integer> userDataTsMap = new HashMap<Integer, Integer>(){{
+		put(2, 16);
+		put(3,4);
+		put(12, 6);
+	}};
+
 	public PduConstants() {
 	}
 

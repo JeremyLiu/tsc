@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @Service
 @Scope
-public class BusynessService implements Processor{
+public class BusinessService implements Processor{
 
     private Map<Integer,BusinessManager> businessManagers = new HashMap<>();
 

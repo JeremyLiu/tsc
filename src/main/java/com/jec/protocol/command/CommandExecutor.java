@@ -95,12 +95,8 @@ public class CommandExecutor {
 		 * 创建socket
 		 */		
 		try {
-			
-			if(auto) {
 
-				socket = new DatagramSocket();
-			
-			}
+			socket = new DatagramSocket();
 
 			return execute0(command);
 			
@@ -115,7 +111,7 @@ public class CommandExecutor {
 			
 		} finally {
 
-			if(auto && socket != null) {
+			if(socket != null) {
 			
 				socket.close();
 				

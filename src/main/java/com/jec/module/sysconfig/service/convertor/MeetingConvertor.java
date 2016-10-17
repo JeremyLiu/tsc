@@ -15,7 +15,6 @@ import javax.annotation.Resource;
 @Service
 public class MeetingConvertor implements Convertor<MeetingConfig>{
 
-
     @Resource
     private NetUnitDao netUnitDao;
 
@@ -28,9 +27,14 @@ public class MeetingConvertor implements Convertor<MeetingConfig>{
 
         if(netUnitDao.find(meeting.getNetunit()) == null)
             return response.message("网元不存在");
-        if(meetingDao.exist(meeting.getNetunit(), meeting.getCode()))
-            return response.message("该网元编码为"+meeting.getCode()+"已配置");
+        if(meetingDao.exist(meeting))
+            return response.message("该网元业务为"+meeting.getCode()+"已配置");
 
         return response.status(Response.STATUS_SUCCESS);
+    }
+
+    @Override
+    public Response checkBeforeRemove(int id) {
+        return null;
     }
 }

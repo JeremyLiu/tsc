@@ -40,9 +40,14 @@ public class DigitTrunkConvertor implements Convertor<DigitTrunk> {
         if(card.getPortCount()<=digitTrunk.getPort())
             return response.message("主时钟端口非法");
 
-        if(digitTrunkDao.exist(digitTrunk.getNetunit(), digitTrunk.getSlot(), digitTrunk.getPort()))
+        if(digitTrunkDao.exist(digitTrunk))
             return response.message("该网元的槽位端口的数字中继已配置");
 
         return response.status(Response.STATUS_SUCCESS);
+    }
+
+    @Override
+    public Response checkBeforeRemove(int id) {
+        return null;
     }
 }

@@ -47,10 +47,10 @@ public class MeetingCommand extends Command {
         // 报内容
         IncreasedPduBuilder pbContent = new IncreasedPduBuilder();
         pbContent.addInteger8(SNGenerator.nextSN());
-        pbContent.addInteger8(0x03);
-        pbContent.addInteger8(0x01);
-        pbContent.addInteger8(0x04);
-        pbContent.addInteger8(0x01);
+        pbContent.addInteger8(PduConstants.CMD_TYPE_YWPZ);
+        pbContent.addInteger8(PduConstants.CMD_CODE_SZCS);
+        pbContent.addInteger8(PduConstants.CONFIG_TYPE_MEETING);
+        pbContent.addInteger8(PduConstants.CARD_TYPE_MCB);
         pbContent.addInteger8(mainSlot);
 
         pbContent.addBCD(BCD.fromString(config.getCode()), PduConstants.LENGTH_OF_BCD);

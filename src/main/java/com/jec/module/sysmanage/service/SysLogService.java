@@ -6,11 +6,14 @@ import com.googlecode.genericdao.search.SearchResult;
 import com.jec.base.entity.PageList;
 import com.jec.module.sysmanage.dao.SysLogDao;
 import com.jec.module.sysmanage.dao.SysLogViewDao;
+import com.jec.module.sysmanage.dao.UserResourceDao;
 import com.jec.module.sysmanage.entity.OperateLog;
+import com.jec.module.sysmanage.entity.UserResource;
 import com.jec.module.sysmanage.entity.view.OperateLogView;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -18,9 +21,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -35,12 +36,22 @@ public class SysLogService extends Thread{
     @Resource
     private SysLogViewDao sysLogViewDao;
 
+    @Resource
+    private UserResourceDao userResourceDao;
+
     private Queue<OperateLog> queue = new ConcurrentLinkedDeque<>();
+
+    private Map<String, String> resourceMap = new HashMap<>();
 
     private final static int batch = 10;
 
     @PostConstruct
     public void init(){
+        List<UserResource> userResources = userResourceDao.getLogReousrce();
+        for(UserResource userResource: userResources)
+            for(String url: userResource.getUrlList())
+                if(!url.equals(""))
+                    resourceMap.put(url.trim(), userResource.getId());
         this.start();
     }
 
@@ -59,6 +70,14 @@ public class SysLogService extends Thread{
         Integer userId = (Integer) session.getAttribute("userId");
         if(userId != null)
             addLog(userId, resourceId, desc);
+    }
+
+    public void addLog(String desc){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String uri = StringUtils.trimLeadingCharacter(request.getPathInfo(),'/');
+        String resId = resourceMap.get(uri);
+        if(resId!=null)
+            addLog(resId, desc);
     }
 
     @Transactional(readOnly = true)

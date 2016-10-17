@@ -13,11 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DigitTrunkDao extends BaseDao<DigitTrunk,Integer> implements GenericDAO<DigitTrunk, Integer> {
 
-    public boolean exist(int netunit,int slot, int port){
+    public boolean exist(DigitTrunk digitTrunk){
         Search search = new Search(DigitTrunk.class);
-        search.addFilterEqual("netunit", netunit);
-        search.addFilterEqual("slot", slot);
-        search.addFilterEqual("port", port);
+        search.addFilterNotEqual("id", digitTrunk.getId());
+        search.addFilterEqual("netunit", digitTrunk.getNetunit());
+        search.addFilterEqual("slot", digitTrunk.getSlot());
+        search.addFilterEqual("port", digitTrunk.getPort());
         return searchUnique(search)!=null;
     }
 }

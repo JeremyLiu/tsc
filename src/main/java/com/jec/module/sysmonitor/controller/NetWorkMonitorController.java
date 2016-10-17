@@ -1,6 +1,9 @@
 package com.jec.module.sysmonitor.controller;
 
+import com.jec.base.dao.BaseDao;
+import com.jec.module.sysconfig.service.ConfigService;
 import com.jec.module.sysmanage.service.SysLogService;
+import com.jec.module.sysmonitor.dao.NetUnitDao;
 import com.jec.module.sysmonitor.service.DeviceStateService;
 import com.jec.module.sysmonitor.service.NetWorkMonitorService;
 import com.jec.module.sysmonitor.service.NetWorkStateService;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jeremyliu on 5/11/16.
@@ -66,7 +70,7 @@ public class NetWorkMonitorController {
             return res;
         }
         res.status(Response.STATUS_SUCCESS).data(netUnitId);
-        sysLogService.addLog("1-0","添加网元" + name);
+        sysLogService.addLog("添加网元" + name);
         return res;
     }
 
@@ -106,7 +110,7 @@ public class NetWorkMonitorController {
         }
 
         res.status(Response.STATUS_SUCCESS).data(netUnit);
-        sysLogService.addLog("1-0","修改网元" + name + "配置");
+        sysLogService.addLog("修改网元" + name + "配置");
         return res;
     }
 
@@ -154,8 +158,7 @@ public class NetWorkMonitorController {
     @RequestMapping(method =RequestMethod.DELETE, value = "/netunit/remove")
     public @ResponseBody
     Response removeNetUnit(@RequestParam(value="id") int netUnitId){
-        boolean result = netWorkMonitorService.removeNetUnit(netUnitId);
-        return Response.Builder(result);
+        return netWorkMonitorService.removeNetUnit(netUnitId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/card")
@@ -204,6 +207,15 @@ public class NetWorkMonitorController {
 //        netWorkStateService.refreshCardSatate();
 //        return Response.Builder();
 //    }
+    @RequestMapping(method = RequestMethod.GET, value = "/refresh")
+    public @ResponseBody
+    Response refresh(@RequestParam(value="netunit", required = false) Integer netunit){
+        if(netunit == null || netunit<=0)
+            netWorkStateService.refreshAll();
+        else
+            netWorkStateService.refresh(netunit);
+        return Response.Builder();
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/card/type")
     public @ResponseBody

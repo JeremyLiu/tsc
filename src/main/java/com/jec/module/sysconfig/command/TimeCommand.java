@@ -6,6 +6,7 @@ import com.jec.protocol.pdu.PduConstants;
 import com.jec.protocol.pdu.SNGenerator;
 import com.jec.protocol.pdu.implement.IncreasedPduBuilder;
 
+import java.security.Timestamp;
 import java.util.Calendar;
 
 /**
@@ -20,10 +21,12 @@ public class TimeCommand extends Command{
     public TimeCommand(){
 
     }
+    private long ts;
 
-    public TimeCommand(int netunit, int mainSlot){
+    public TimeCommand(int netunit, int mainSlot,long ts){
         this.netunit = netunit;
         this.mainSlot = mainSlot;
+        this.ts = ts;
     }
 
     @Override
@@ -38,6 +41,8 @@ public class TimeCommand extends Command{
         builder.addInteger8(mainSlot);
 
         Calendar calendar = Calendar.getInstance();
+        if(ts>=0)
+            calendar.setTimeInMillis(ts);
 
         builder.addInteger8(calendar.get(Calendar.YEAR) - 2000);
         builder.addInteger8(calendar.get(Calendar.MONTH) + 1);

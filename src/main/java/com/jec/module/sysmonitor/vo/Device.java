@@ -18,7 +18,7 @@ public class Device implements Serializable {
     public Device(TerminalDeviceView terminal){
         this.id = terminal.getId();
         this.name = terminal.getName();
-        this.port = terminal.getPortNumber();
+        this.code = terminal.getCode();
 //        this.slot = terminal.getSlotNumber();
     }
 
@@ -26,9 +26,7 @@ public class Device implements Serializable {
 
     private String name;
 
-//    private int slot;
-
-    private int port;
+    private String code;
 
     public int getId() {
         return id;
@@ -46,19 +44,11 @@ public class Device implements Serializable {
         this.name = name;
     }
 
-//    public int getSlot() {
-//        return slot;
-//    }
-//
-//    public void setSlot(int slot) {
-//        this.slot = slot;
-//    }
-
-    public int getPort() {
-        return port;
+    public String getCode() {
+        return code;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setCode(String code) {
+        this.code = code;
     }
 }

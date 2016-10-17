@@ -52,4 +52,10 @@ public class DateTimeUtils {
 			return null;
 		}
 	}
+
+	public static boolean isValidTime(String time){
+		return String2DateTime("2016-01-01 "+time)!=null;
+	}
+
+
 }

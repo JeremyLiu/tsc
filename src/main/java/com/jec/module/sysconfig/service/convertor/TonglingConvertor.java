@@ -26,9 +26,14 @@ public class TonglingConvertor implements Convertor<TonglingConfig> {
 
         if(netUnitDao.find(tonglingConfig.getNetunit()) == null)
             return response.message("网元不存在");
-        if(tonglingDao.exist(tonglingConfig.getNetunit(), tonglingConfig.getCode()))
+        if(tonglingDao.exist(tonglingConfig))
             return response.message("该网元编码为"+tonglingConfig.getCode()+"已配置");
 
         return response.status(Response.STATUS_SUCCESS);
+    }
+
+    @Override
+    public Response checkBeforeRemove(int id) {
+        return null;
     }
 }

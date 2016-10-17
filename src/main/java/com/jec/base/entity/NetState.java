@@ -35,10 +35,18 @@ public class NetState implements Serializable{
         }
     }
 
-    public static int deviceStateMap(int state){
+    public static int portStateMap(int state){
         switch (state){
             case 0: return US_NORMAL;
             case 1: return US_FAILURE;
+            default: return UNKNOWN;
+        }
+    }
+
+    public static int deviceStateMap(int state){
+        switch (state){
+            case 1: return US_NORMAL;
+            case 2: return US_FAILURE;
             default: return UNKNOWN;
         }
     }

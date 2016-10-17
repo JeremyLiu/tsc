@@ -1,6 +1,7 @@
 package com.jec.module.sysconfig.service;
 
 import com.jec.module.sysconfig.command.CardTypeCommand;
+import com.jec.module.sysmanage.service.SysLogService;
 import com.jec.module.sysmonitor.entity.Card;
 import com.jec.module.sysmonitor.entity.NetUnit;
 import com.jec.protocol.command.Command;
@@ -10,6 +11,7 @@ import com.jec.utils.Response;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -18,13 +20,16 @@ import java.util.List;
 @Service
 public class CardDownloadService extends DownloadService {
 
+    @Resource
+    private SysLogService sysLogService;
+
     @Transactional(readOnly = true)
     public Response downloadCard(NetUnit netUnit){
 
         int netUnitId = netUnit.getId();
 
         if(!netStateService.isOnline(netUnitId))
-            return Response.Builder(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
+            return Response.Builder().status(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
 
         List<Card> cards = cardDao.getCardByNetunit(netUnitId);
         Response result = Response.Builder(Response.STATUS_PARAM_ERROR);
@@ -72,9 +77,17 @@ public class CardDownloadService extends DownloadService {
         if(netUnit == null)
             return Response.Builder(Response.STATUS_PARAM_ERROR);
         else {
+            Response resp;
             synchronized (executor) {
-                return downloadCard(netUnit);
+                resp = downloadCard(netUnit);
             }
+            String desc="下载"+netUnit.getName()+"的板卡配置,";
+            if(resp.isSuccess())
+                desc+="下载成功";
+            else
+                desc+=resp.getMessage();
+            sysLogService.addLog(desc);
+            return resp;
         }
     }
 
@@ -97,7 +110,12 @@ public class CardDownloadService extends DownloadService {
             desc = desc.substring(0,desc.length() - 1);
             response.message(desc);
         }
-
+        desc="下载所有网元的板卡配置,";
+        if(response.isSuccess())
+            desc+="下载成功";
+        else
+            desc+=response.getMessage();
+        sysLogService.addLog(desc);
         return response;
     }
 

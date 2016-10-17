@@ -100,11 +100,11 @@ public class RecordService implements RawProcessor,RecordSessionListener{
     @Transactional
     public boolean removeRecord(int id){
         Record record = recordDao.find(id);
-        if(FileUtil.deleteDir(record.getFilePath())){
+        if(record != null){
+            FileUtil.deleteDir(record.getFilePath());
             recordDao.remove(record);
-            return true;
-        }else
-            return false;
+        }
+        return true;
     }
 
     @Override

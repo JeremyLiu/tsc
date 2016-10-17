@@ -27,7 +27,8 @@ public class NetWorkUtil {
 
                     if(ia instanceof Inet4Address) {
                         String address = ia.getHostAddress();
-                        return address;
+                        if(!address.equals("127.0.0.1"))
+                            return address;
                     }
                 }
             }

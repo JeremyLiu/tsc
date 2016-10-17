@@ -7,4 +7,6 @@ import com.jec.utils.Response;
  */
 public interface Convertor<T>{
     Response process(T t);
+
+    Response checkBeforeRemove(int id);
 }

@@ -20,7 +20,7 @@ public class RecordListenerService {
     @Resource
     private RecordService recordService;
 
-    private boolean exit = true;
+    private boolean exit = false;
 
     public synchronized void stopListen() {
         exit = true;

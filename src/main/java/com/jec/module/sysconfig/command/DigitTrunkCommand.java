@@ -68,7 +68,15 @@ public class DigitTrunkCommand extends Command {
         pbContent.addInteger8(digitTrunk.getSlot());
         pbContent.addInteger8(digitTrunk.getPort());
 
-        //TODO: 设置opc,dpc,cic等值
+        pbContent.addInteger8(digitTrunk.getMode());
+        pbContent.addInteger8(digitTrunk.getInterfaceType());
+        pbContent.addInteger8(digitTrunk.getDistanceMode());
+        pbContent.addInteger8(digitTrunk.getClockMode());
+
+        // 设置opc,dpc,cic等值
+        pbContent.addInteger32(digitTrunk.getDpcValue());
+        pbContent.addInteger32(digitTrunk.getOpcValue());
+        pbContent.addInteger16(digitTrunk.getCic());
 
         // 报文头
         IncreasedPduBuilder pb = new IncreasedPduBuilder();

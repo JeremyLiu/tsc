@@ -4,6 +4,7 @@ import com.googlecode.genericdao.search.Search;
 import com.jec.module.sysconfig.command.DigitTrunkCommand;
 import com.jec.module.sysconfig.dao.DigitTrunkDao;
 import com.jec.module.sysconfig.entity.DigitTrunk;
+import com.jec.module.sysmanage.service.SysLogService;
 import com.jec.module.sysmonitor.entity.Card;
 import com.jec.module.sysmonitor.entity.NetUnit;
 import com.jec.protocol.command.Command;
@@ -27,12 +28,15 @@ public class DigitTrunkDownloadService extends DownloadService{
     @Resource
     private DigitTrunkDao digitTrunkDao;
 
+    @Resource
+    private SysLogService sysLogService;
+
     protected Response download(NetUnit netUnit, List<DigitTrunk> configs){
 
         int netUnitId = netUnit.getId();
 
         if(!netStateService.isOnline(netUnitId))
-            return Response.Builder(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
+            return Response.Builder().status(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
         executor.setRemoteAddress(netUnit.getIp(), netUnit.getPort());
         Command command;
         Response response = Response.Builder();
@@ -99,6 +103,12 @@ public class DigitTrunkDownloadService extends DownloadService{
             response.message(desc);
         }
 
+        desc="下载所有网元的数字中继配置,";
+        if(response.isSuccess())
+            desc+="下载成功";
+        else
+            desc+=response.getMessage();
+        sysLogService.addLog(desc);
         return response;
     }
 
@@ -110,8 +120,16 @@ public class DigitTrunkDownloadService extends DownloadService{
         Search search = new Search(DigitTrunk.class);
         search.addFilterEqual("netunit", netUnitId);
         List<DigitTrunk> digitTrunks =  digitTrunkDao.search(search);
+        Response resp;
         synchronized (executor) {
-            return download(netUnit, digitTrunks);
+            resp = download(netUnit, digitTrunks);
         }
+        String desc="下载"+netUnit.getName()+"的数字中继配置,";
+        if(resp.isSuccess())
+            desc+="下载成功";
+        else
+            desc+=resp.getMessage();
+        sysLogService.addLog(desc);
+        return resp;
     }
 }

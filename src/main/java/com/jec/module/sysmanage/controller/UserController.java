@@ -62,6 +62,7 @@ public class UserController {
 		User user = userService.saveNewUser(username, password,role);
 		if(user == null)
 			return res.message("用户名已存在");
+		sysLogService.addLog("添加用户"+username);
 		return res.status(Response.STATUS_SUCCESS).data(user);
 	}
 
@@ -88,7 +89,7 @@ public class UserController {
 
 		user.setPassword(newPassword);
 		userService.saveUser(user);
-
+		sysLogService.addLog("修改密码");
 		return res.status(Response.STATUS_SUCCESS);
 	}
 
@@ -103,16 +104,24 @@ public class UserController {
 			return res.message("用户名不合法");
 
 		User user = userService.getUser(userId);
+		String oldName = user.getName();
 		if(user == null)
 			return res.message("用户不存在");
 
-		if(!user.getName().equals(name) && userService.exist(name))
+		if(!oldName.equals(name) && userService.exist(name))
 			return res.message("该用户名已被使用");
 
 		if(password != null && (password.length() <= 0 || password.length()>30))
 			return res.message("密码不能为空,且不能超过30个字符");
 
-		return res.status(Response.STATUS_SUCCESS).data(userService.modifyUser(userId,name, role, password));
+		boolean result=userService.modifyUser(userId,name, role, password);
+		if(result) {
+			String desc="修改用户"+oldName;
+			if(name!=null && !name.equals(oldName))
+				desc+= ",并更改新用户名为"+name;
+			sysLogService.addLog(desc);
+		}
+		return res.status(Response.STATUS_SUCCESS).data(result);
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "remove")
@@ -136,7 +145,6 @@ public class UserController {
 		Response res = Response.Builder().status(Response.STATUS_PARAM_ERROR);
 		if(name.length() == 0 || name.length()>60)
 			return res.message("角色名不合法");
-
 		return res.status(Response.STATUS_SUCCESS).data(userService.addUserRole(name,privilege.split(",")));
 	}
 

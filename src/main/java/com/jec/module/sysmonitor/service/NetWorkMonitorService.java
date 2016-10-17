@@ -1,6 +1,9 @@
 package com.jec.module.sysmonitor.service;
 
 import com.googlecode.genericdao.search.Search;
+import com.jec.base.dao.BaseDao;
+import com.jec.module.sysconfig.service.ConfigService;
+import com.jec.module.sysmanage.service.SysLogService;
 import com.jec.module.sysmonitor.dao.*;
 import com.jec.module.sysmonitor.entity.*;
 import com.jec.module.sysmonitor.entity.view.CardView;
@@ -9,6 +12,7 @@ import com.jec.module.sysmonitor.vo.CardConfig;
 import com.jec.module.sysmonitor.vo.Device;
 import com.jec.module.sysmonitor.vo.NetTopo;
 import com.jec.protocol.pdu.PduConstants;
+import com.jec.utils.Response;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +47,11 @@ public class NetWorkMonitorService {
     @Resource
     private NetConnectDao netConnectDao;
 
+    @Resource
+    private ConfigService configService;
+
+    @Resource
+    private SysLogService sysLogService;
 
     @Transactional
     public int addNetUnit(String name, String ip, int port, int slotCount){
@@ -168,6 +177,7 @@ public class NetWorkMonitorService {
         }
 
         netConnectDao.save(netConnect);
+        sysLogService.addLog("添加"+src.getName()+"到"+dest.getName()+"的连接配置");
         return true;
     }
 
@@ -220,64 +230,64 @@ public class NetWorkMonitorService {
 
         for(CardView cardView: cardViews) {
             CardConfig cardConfig = new CardConfig(cardView);
-            search.clear();
-            search.addFilterEqual("cardId", cardView.getId());
-            List<TerminalDevice> devices = terminalDeviceDao.search(search);
-            cardConfig.setDevices(devices.toArray(new TerminalDevice[devices.size()]));
+//            search.clear();
+//            search.addFilterEqual("cardId", cardView.getId());
+//            List<TerminalDevice> devices = terminalDeviceDao.search(search);
+//            cardConfig.setDevices(devices.toArray(new TerminalDevice[devices.size()]));
             cardConfigs.add(cardConfig);
         }
         return cardConfigs;
     }
 
-    @Transactional
-    public boolean modifyCard(List<CardConfig> cardConfigs){
-
-        Map<Integer, CardType> cardTypeMap = getCardTypeMap();
-
-        List<Card> cards = new ArrayList<>();
-        List<TerminalDevice> terminalDevices = new ArrayList<>();
-        List<Integer> cardIds = new ArrayList<>();
-        Set<Integer> portSet = new HashSet<>();
-
-        for(CardConfig cardConfig : cardConfigs){
-            TerminalDevice[] devices = cardConfig.getDevices();
-            int cardPort = cardTypeMap.get(cardConfig.getType()).getPortCount();
-            if(!cardTypeMap.containsKey(cardConfig.getType())
-                    || cardPort < devices.length)
-                continue;
-
-            Card card = new Card();
-            card.setId(cardConfig.getId());
-            card.setType(cardConfig.getType());
-            cards.add(card);
-
-            portSet.clear();
-            for(TerminalDevice device: devices){
-                device.setCardId(cardConfig.getId());
-                int port = device.getCardPort();
-                if(port < cardPort &&
-                        device.getName().length()>0 && device.getName().length()<60
-                        && !portSet.contains(port)) {
-                    terminalDevices.add(device);
-                    portSet.add(port);
-                }
-            }
-            if(devices.length>0)
-                cardIds.add(cardConfig.getId());
-        }
-        try {
-            if(cards.size()>0)
-                cardDao.save(cards.toArray(new Card[cards.size()]));
-            terminalDeviceDao.removeDeviceByCard( cardIds.toArray(new Integer[cardIds.size()]));
-            terminalDeviceDao.save(terminalDevices.toArray(new TerminalDevice[terminalDevices.size()]));
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-
-        return true;
-    }
-
+//    @Transactional
+//    public boolean modifyCard(List<CardConfig> cardConfigs){
+//
+//        Map<Integer, CardType> cardTypeMap = getCardTypeMap();
+//
+//        List<Card> cards = new ArrayList<>();
+//        List<TerminalDevice> terminalDevices = new ArrayList<>();
+//        List<Integer> cardIds = new ArrayList<>();
+//        Set<Integer> portSet = new HashSet<>();
+//
+//        for(CardConfig cardConfig : cardConfigs){
+//            TerminalDevice[] devices = cardConfig.getDevices();
+//            int cardPort = cardTypeMap.get(cardConfig.getType()).getPortCount();
+//            if(!cardTypeMap.containsKey(cardConfig.getType())
+//                    || cardPort < devices.length)
+//                continue;
+//
+//            Card card = new Card();
+//            card.setId(cardConfig.getId());
+//            card.setType(cardConfig.getType());
+//            cards.add(card);
+//
+//            portSet.clear();
+//            for(TerminalDevice device: devices){
+//                device.setCardId(cardConfig.getId());
+//                int port = device.getCardPort();
+//                if(port < cardPort &&
+//                        device.getName().length()>0 && device.getName().length()<60
+//                        && !portSet.contains(port)) {
+//                    terminalDevices.add(device);
+//                    portSet.add(port);
+//                }
+//            }
+//            if(devices.length>0)
+//                cardIds.add(cardConfig.getId());
+//        }
+//        try {
+//            if(cards.size()>0)
+//                cardDao.save(cards.toArray(new Card[cards.size()]));
+//            terminalDeviceDao.removeDeviceByCard( cardIds.toArray(new Integer[cardIds.size()]));
+//            terminalDeviceDao.save(terminalDevices.toArray(new TerminalDevice[terminalDevices.size()]));
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return false;
+//        }
+//
+//        return true;
+//    }
+//
 
     @Transactional
     public boolean modifyCard(int id,int type){
@@ -288,23 +298,39 @@ public class NetWorkMonitorService {
         if(cardType == null)
             return false;
         card.setType(type);
-
-//        cardDao.save(card);
+        cardDao.save(card);
+        String name = netUnitDao.find(card.getNetUnitId()).getName();
+        sysLogService.addLog("修改"+name+"的"+card.getSlotNumber()+"号槽位板卡类型");
         return true;
     }
 
     @Transactional
-    public boolean removeNetUnit(int netUnitId){
+    public Response removeNetUnit(int netUnitId){
 
+        Response response = Response.Builder();
         try {
+            Search search = new Search();
+            for(Map.Entry<Class<?>, BaseDao> entry: configService.map.entrySet()){
+                BaseDao dao = entry.getValue();
+                search.clear();
+                search.setSearchClass(entry.getClass());
+                search.addFilterEqual("netunit", netUnitId);
+                List list = dao.search(search);
+                if(list.size()>0)
+                    return response.message("系统存在该网元的业务配置或设备配置,请先删除").status(Response.STATUS_FAIL);
+            }
+            NetUnit netUnit = netUnitDao.find(netUnitId);
+            if(netUnit == null)
+                return response.message("网元不存在").status(Response.STATUS_PARAM_ERROR);
             terminalDeviceDao.removeDeviceByNetUnit(netUnitId);
             cardDao.removeByNetUnit(netUnitId);
             netConnectDao.removeConnect(netUnitId);
             netUnitDao.removeById(netUnitId);
-            return true;
+            sysLogService.addLog("删除"+netUnit.getName());
+            return response.data(true);
         }catch (Exception e){
             e.printStackTrace();
-            return false;
+            return response.data(false);
         }
 
     }

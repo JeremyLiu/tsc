@@ -27,11 +27,7 @@ public class TerminalDeviceView implements Serializable{
     @Column(name="element_name")
     private String netUnitName;
 
-//    @Column(name="slot_number")
-//    private int slotNumber;
-
-    @Column(name="card_port")
-    private int portNumber;
+    private String code;
 
     @OneToMany(targetEntity = DevicePort.class, mappedBy = "deviceId")
     private List<DevicePort> ports = new ArrayList<>();
@@ -68,12 +64,13 @@ public class TerminalDeviceView implements Serializable{
 //        this.slotNumber = slotNumber;
 //    }
 
-    public int getPortNumber() {
-        return portNumber;
+
+    public String getCode() {
+        return code;
     }
 
-    public void setPortNumber(int portNumber) {
-        this.portNumber = portNumber;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getNetUnitName() {
@@ -95,9 +92,6 @@ public class TerminalDeviceView implements Serializable{
 
     @JsonIgnore
     public BCD getDeafultPort(){
-        if(ports != null && ports.size()>0)
-            return BCD.fromString(String.valueOf(ports.get(0).getId()));
-        else
-            return new BCD();
+        return BCD.fromString(String.valueOf(code));
     }
 }

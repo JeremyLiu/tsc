@@ -22,7 +22,7 @@ public class TonglingConfig implements Serializable, NetUnitConfig{
     @GenericGenerator(name="increment",strategy="increment")
     private int id;
 
-    public final static String splitChar = "\n \r\n\t";
+    public final static String splitChar = "\\n|\\r\\n| |\\t";
 
     @Column(name="element_id")
     private int netunit;
@@ -63,14 +63,23 @@ public class TonglingConfig implements Serializable, NetUnitConfig{
             return resp.message("用户不能为空");
         if(members==null || members.equals(""))
             return resp.message("成员不能为空");
-        if(commanders==null || commanders.equals(""))
-            return resp.message("指挥不能为空");
-        if(!bcdListValidate(getUsers()))
-            return resp.message("用户格式错误");
-        if(!bcdListValidate(getMembers()))
+        String[] userList = getUsers();
+        if(!bcdListValidate(userList))
+            return resp.message("有权用户格式错误");
+        if(userList.length>10)
+            return resp.message("有权用户个数不能超过10个");
+
+        String[] memberList = getMembers();
+        if(!bcdListValidate(memberList))
             return resp.message("成员格式错误");
-        if(!bcdListValidate(getCommanders()))
+        if(memberList.length>40)
+            return resp.message("成员个数不能超过40个");
+
+        String[] commanderList = getCommanders();
+        if(!bcdListValidate(commanderList))
             return resp.message("指挥格式错误");
+        if(commanderList.length>10)
+            return resp.message("指挥个数不能超过10个");
         return resp.status(Response.STATUS_SUCCESS);
     }
 
@@ -108,6 +117,8 @@ public class TonglingConfig implements Serializable, NetUnitConfig{
     }
 
     public String[] getCommanders() {
+        if(commanders.equals(""))
+            return new String[0];
         return commanders.split(splitChar);
     }
 

@@ -1,6 +1,7 @@
 package com.jec.module.sysconfig.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.jec.protocol.unit.BCD;
 import com.jec.utils.Response;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -20,7 +21,7 @@ public class MeetingConfig implements Serializable, NetUnitConfig {
     @GenericGenerator(name="increment",strategy="increment")
     private int id;
 
-    public final static String splitChar = "\n\r\n \t";
+    public final static String splitChar = "\\n|\\r\\n| |\\t";
 
     @Column(name="element_id")
     private int netunit;
@@ -56,19 +57,30 @@ public class MeetingConfig implements Serializable, NetUnitConfig {
     @Override
     public Response validate() {
         Response resp = Response.Builder().status(Response.STATUS_PARAM_ERROR);
-        if(name==null || name.equals(""))
-            return resp.message("名称不能为空");
-        if(code==null || code.equals(""))
-            return resp.message("编码不能为空");
+        if(name.equals(""))
+            return resp.message("业务名不能为空");
+        if(name.length()>20)
+            return resp.message("业务名长度超过20个字符");
+        if(code.equals(""))
+            return resp.message("业务代码不能为空");
+        if(BCD.fromString(code) == null)
+            return resp.message("业务代码格式错误");
+
         if(users==null || users.equals(""))
-            return resp.message("用户不能为空");
+            return resp.message("有权用户不能为空");
         if(members==null || members.equals(""))
             return resp.message("成员不能为空");
-        if(!bcdListValidate(getUsers()))
-            return resp.message("用户格式错误");
-        if(!bcdListValidate(getMembers()))
-            return resp.message("成员格式错误");
+        String[] userList = getUsers();
+        if(!bcdListValidate(userList))
+            return resp.message("有权用户格式错误");
+        if(userList.length>10)
+            return resp.message("有权用户个数不能超过10个");
 
+        String[] memberList = getMembers();
+        if(!bcdListValidate(memberList))
+            return resp.message("成员格式错误");
+        if(memberList.length>40)
+            return resp.message("成员个数不能超过40个");
         return resp.status(Response.STATUS_SUCCESS);
     }
 

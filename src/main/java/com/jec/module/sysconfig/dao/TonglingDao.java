@@ -14,10 +14,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class TonglingDao extends BaseDao<TonglingConfig, Integer> implements GenericDAO<TonglingConfig, Integer>{
 
-    public boolean exist(int netunit, String code){
+    public boolean exist(TonglingConfig tonglingConfig){
         Search search = new Search(TonglingConfig.class);
-        search.addFilterEqual("netunit", netunit);
-        search.addFilterEqual("code", code);
+        search.addFilterEqual("id", tonglingConfig.getId());
+        search.addFilterEqual("netunit", tonglingConfig.getNetunit());
+        search.addFilterEqual("code", tonglingConfig.getCode());
         return searchUnique(search)!=null;
     }
 }

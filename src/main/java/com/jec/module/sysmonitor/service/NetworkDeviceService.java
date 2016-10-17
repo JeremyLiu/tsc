@@ -1,6 +1,12 @@
 package com.jec.module.sysmonitor.service;
 
 import com.googlecode.genericdao.search.Search;
+import com.jec.module.sysconfig.dao.TerminalBusinessViewDao;
+import com.jec.module.sysconfig.dao.TerminalKeyConfigDao;
+import com.jec.module.sysconfig.dao.TerminalKeyConfigViewDao;
+import com.jec.module.sysconfig.entity.TerminalKeyConfig;
+import com.jec.module.sysconfig.entity.vo.TerminalBusinessView;
+import com.jec.module.sysconfig.entity.vo.TerminalKeyConfigView;
 import com.jec.module.sysmonitor.dao.DevicePortDao;
 import com.jec.module.sysmonitor.dao.NetUnitDao;
 import com.jec.module.sysmonitor.dao.TerminalDeviceDao;
@@ -32,28 +38,35 @@ public class NetworkDeviceService {
     @Resource
     private DevicePortDao devicePortDao;
 
+    @Resource
+    private TerminalBusinessViewDao terminalBusinessViewDao;
+
+    @Resource
+    private TerminalKeyConfigViewDao terminalKeyConfigViewDao;
+
     @Transactional(readOnly = true)
-    public List<TerminalDeviceView> getAllDevice(){
-        return terminalDeviceViewDao.findAll();
+    public List<TerminalDeviceView> getAllDevice(int netunit){
+        if(netunit>0)
+            return terminalDeviceViewDao.findByNetunit(netunit);
+        else
+            return terminalDeviceViewDao.findAll();
     }
 
     @Transactional
-    public int createDevice(int netUnitId,String name, int slot, int port){
+    public int createDevice(int netUnitId,String name, String code){
         if(netUnitDao.find(netUnitId) == null)
             return -1;
 
         TerminalDevice terminalDevice = new TerminalDevice();
         terminalDevice.setName(name);
-        terminalDevice.setCardId(slot);
-        terminalDevice.setCardPort(port);
         terminalDevice.setNetUnitId(netUnitId);
-
+        terminalDevice.setCode(code);
         terminalDeviceDao.save(terminalDevice);
         return terminalDevice.getId();
     }
 
     @Transactional
-    public boolean modifyDevice(int id, Integer netUnitId, String name, Integer slot, Integer port){
+    public boolean modifyDevice(int id, Integer netUnitId, String name, String code){
         TerminalDevice terminalDevice = terminalDeviceDao.find(id);
         if(terminalDevice == null)
             return false;
@@ -62,12 +75,10 @@ public class NetworkDeviceService {
             return false;
         if(name != null)
             terminalDevice.setName(name);
-        if(slot != null)
-            terminalDevice.setCardId(slot);
-        if(port != null)
-            terminalDevice.setCardPort(port);
         if(netUnitId != null)
             terminalDevice.setNetUnitId(netUnitId);
+        if(code!=null)
+            terminalDevice.setCode(code);
         return true;
     }
 
@@ -94,29 +105,43 @@ public class NetworkDeviceService {
     }
 
     @Transactional
-    public int createDevicePort(int deviceId, int number, String function){
+    public int createDevicePort(int deviceId, String number, String function, boolean enable){
         if(terminalDeviceDao.find(deviceId) == null)
             return -1;
-        if(devicePortDao.find(number) != null)
-            return -2;
         DevicePort devicePort = new DevicePort();
-        devicePort.setId(number);
+        devicePort.setNumber(number);
         devicePort.setDeviceId(deviceId);
+        if(devicePortDao.exist(devicePort))
+            return -2;
         devicePort.setFunction(function);
+        devicePort.setEnable(enable);
         devicePortDao.save(devicePort);
 
         return devicePort.getId();
     }
 
     @Transactional
-    public boolean modifyDevicePort(int oldId, Integer number, String function){
-        if(number != null && devicePortDao.find(number) != null)
+    public boolean modifyDevicePort(int oldId, String number, String function,boolean enable){
+        DevicePort devicePort = devicePortDao.find(oldId);
+        if(devicePort == null)
             return false;
-        return devicePortDao.updatePort(oldId,number,function) > 0;
+        if(number != null && devicePortDao.exist(devicePort))
+            return false;
+        return devicePortDao.updatePort(oldId,number,function, enable) > 0;
     }
 
     @Transactional
     public boolean removeDevicePort(int id){
         return devicePortDao.removeById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TerminalBusinessView> getTerminalBusiness(String number){
+        return terminalBusinessViewDao.findByDevice(number);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TerminalKeyConfigView> getTerminalKeyConfig(String number){
+        return terminalKeyConfigViewDao.findByDevice(number);
     }
 }

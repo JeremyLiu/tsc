@@ -17,6 +17,7 @@ public class Response extends HashMap<String,Object> implements Serializable{
 	public final static int STATUS_SYS_ERROR = 2;
 	public final static int STATUS_PARTIAL_SUCCESS = 3;
 	public final static int PRIVILEGE_INSUFFICIENT = 4;
+	public final static int STATUS_FAIL = 5;
 
 	public static Response Builder(Object entity)
 	{
@@ -47,5 +48,13 @@ public class Response extends HashMap<String,Object> implements Serializable{
 	public Response data(Object data){
 		this.put("data", data);
 		return this;
+	}
+
+    public String getMessage(){
+        return (String)get("message");
+    }
+
+	public boolean isSuccess(){
+		return (int)this.get("status") == STATUS_SUCCESS;
 	}
 }

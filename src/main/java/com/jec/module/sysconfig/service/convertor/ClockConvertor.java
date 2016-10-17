@@ -55,4 +55,9 @@ public class ClockConvertor implements Convertor<Clock>{
         clock.setType3(card.getCode());
         return response.status(Response.STATUS_SUCCESS);
     }
+
+    @Override
+    public Response checkBeforeRemove(int id) {
+        return null;
+    }
 }

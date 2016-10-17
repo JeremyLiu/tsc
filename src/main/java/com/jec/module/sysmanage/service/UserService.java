@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.jws.soap.SOAPBinding;
 
 import com.jec.module.sysmanage.dao.PrivilegeDao;
 import com.jec.module.sysmanage.dao.RoleDao;
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.googlecode.genericdao.search.Search;
 import com.jec.module.sysmanage.dao.UserDao;
 import com.jec.module.sysmanage.entity.User;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @Service
@@ -104,7 +102,6 @@ public class UserService {
 	@Transactional
 	public boolean modifyUser(int userId, String name, Integer role, String password){
 		if(userDao.updateUser(userId, name, role, password) > 0) {
-			sysLogService.addLog("4-0","修改用户 "+ name +" 的信息");
 			return true;
 		}
 		else
@@ -161,7 +158,7 @@ public class UserService {
 			}
 		}
 		role.setPrivilege(privileges);
-		sysLogService.addLog("4-1","添加角色" + name);
+		sysLogService.addLog("添加角色" + name);
 		return role;
 	}
 
@@ -192,7 +189,7 @@ public class UserService {
 			privilegeDao.save(p);
 		}
 
-		sysLogService.addLog("4-1","修改角色" + role.getName() + "权限");
+		sysLogService.addLog("修改角色" + role.getName() + "权限");
 		return true;
 	}
 
@@ -204,7 +201,7 @@ public class UserService {
 		String oldName = role.getName();
 		role.setName(name);
 		roleDao.save(role);
-		sysLogService.addLog("4-1","修改角色名" + oldName);
+		sysLogService.addLog("修改角色名" + oldName);
 		return true;
 	}
 }

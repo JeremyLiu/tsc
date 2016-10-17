@@ -4,6 +4,7 @@ import com.googlecode.genericdao.search.Search;
 import com.jec.module.sysconfig.command.MeetingCommand;
 import com.jec.module.sysconfig.dao.MeetingDao;
 import com.jec.module.sysconfig.entity.MeetingConfig;
+import com.jec.module.sysmanage.service.SysLogService;
 import com.jec.module.sysmonitor.entity.Card;
 import com.jec.module.sysmonitor.entity.NetUnit;
 import com.jec.protocol.command.Command;
@@ -27,11 +28,14 @@ public class MeetingDownloadService extends DownloadService{
     @Resource
     private MeetingDao meetingDao;
 
+    @Resource
+    private SysLogService sysLogService;
+
     protected Response meetingDownload(NetUnit netUnit, List<MeetingConfig> configs){
         int netUnitId = netUnit.getId();
 
         if(!netStateService.isOnline(netUnitId))
-            return Response.Builder(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
+            return Response.Builder().status(Response.STATUS_PARTIAL_SUCCESS).message(netUnit.getName() + "不在线");
         executor.setRemoteAddress(netUnit.getIp(), netUnit.getPort());
         Command command;
         Response response = Response.Builder();
@@ -54,6 +58,12 @@ public class MeetingDownloadService extends DownloadService{
             response.message(desc);
         }
 
+        desc="下载所有网元的会议配置,";
+        if(response.isSuccess())
+            desc+="下载成功";
+        else
+            desc+=response.getMessage();
+        sysLogService.addLog(desc);
         return response;
 
     }
@@ -110,8 +120,16 @@ public class MeetingDownloadService extends DownloadService{
         Search search = new Search(MeetingConfig.class);
         search.addFilterEqual("netunit", netUnitId);
         List<MeetingConfig> meetingConfigs =  meetingDao.search(search);
+        Response resp;
         synchronized (executor) {
-            return meetingDownload(netUnit, meetingConfigs);
+            resp = meetingDownload(netUnit, meetingConfigs);
         }
+        String desc="下载"+netUnit.getName()+"的会议配置,";
+        if(resp.isSuccess())
+            desc+="下载成功";
+        else
+            desc+=resp.getMessage();
+        sysLogService.addLog(desc);
+        return resp;
     }
 }
